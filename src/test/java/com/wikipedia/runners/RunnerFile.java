@@ -14,4 +14,4 @@ import io.cucumber.testng.CucumberOptions;
     },
     monochrome = true
 )
-public class RunnerTest extends AbstractTestNGCucumberTests { }
+public class RunnerFile extends AbstractTestNGCucumberTests { }
