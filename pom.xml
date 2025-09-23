@@ -88,7 +88,7 @@
         <version>3.2.5</version>
         <configuration>
           <includes>
-            <include>**/*Runner*.java</include>
+            <include>**/*RunnerTest*.java</include>
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
           </includes>
