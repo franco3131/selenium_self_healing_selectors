@@ -97,6 +97,8 @@
         <value>testng</value>
       </property>
     </properties>
+<parallel>none</parallel>
+  <useModulePath>false</useModulePath>
   </configuration>
 </plugin>
     </plugins>
