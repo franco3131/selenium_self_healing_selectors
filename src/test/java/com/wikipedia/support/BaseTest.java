@@ -13,29 +13,21 @@ public class BaseTest {
 
     private static final ThreadLocal<WebDriver> threadLocalBrowser = new ThreadLocal<>();
 
-    @Before(order = 0)
-    public void startBrowserSession() {
+@Before(order = 0)
+public void startBrowserSession() throws IOException {
     ChromeOptions options = new ChromeOptions();
 
-    // Unique profile dir (important for GitHub Actions/Linux)
     Path tmpProfile = Files.createTempDirectory("gha-chrome-profile-");
-    options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath().toString());
+    options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath());
 
-    // Headless & CI-safe flags
-    options.addArguments("--headless=new");
-    options.addArguments("--disable-gpu");
-    options.addArguments("--no-sandbox");
-    options.addArguments("--disable-dev-shm-usage");
-    options.addArguments("--window-size=1920,1080");
+    options.addArguments("--headless=new", "--disable-gpu", "--no-sandbox",
+                         "--disable-dev-shm-usage", "--window-size=1920,1080",
+                         "--remote-allow-origins=*");
 
-    // optional: avoid remote origin issues
-    options.addArguments("--remote-allow-origins=*");
-
-    WebDriver standardBrowserDriver = new ChromeDriver(options);
-    SelfHealingDriver healingBrowserDriver = SelfHealingDriver.create(standardBrowserDriver);
-
-    threadLocalBrowser.set(healingBrowserDriver);
-    }
+    WebDriver standard = new ChromeDriver(options);
+    WebDriver healing = SelfHealingDriver.create(standard);
+    threadLocalBrowser.set(healing);
+}
 
     @After(order = 0)
     public void endBrowserSession() {
