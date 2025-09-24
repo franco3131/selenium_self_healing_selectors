@@ -14,4 +14,13 @@ import io.cucumber.testng.CucumberOptions;
     },
     monochrome = true
 )
-public class RunnerTest extends AbstractTestNGCucumberTests { }
+    
+public class RunnerTest extends AbstractTestNGCucumberTests {
+  @Override
+  @org.testng.annotations.DataProvider(parallel = false)
+  public Object[][] scenarios() {
+    return super.scenarios();
+  }
+
+    
+}
