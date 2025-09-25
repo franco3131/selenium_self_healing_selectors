@@ -21,8 +21,7 @@ public void startBrowserSession() throws IOException {
     Path tmpProfile = Files.createTempDirectory("gha-chrome-profile-");
     options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath());
 
-    options.addArguments("--headless=new", "--disable-gpu", "--no-sandbox",
-                         "--disable-dev-shm-usage", "--window-size=1920,1080",
+    options.addArguments("--headless=new", "--window-size=1440,692",
                          "--remote-allow-origins=*");
 
     WebDriver standard = new ChromeDriver(options);
