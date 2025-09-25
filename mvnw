@@ -216,6 +216,7 @@ if $cygwin; then
     MAVEN_PROJECTBASEDIR=`cygpath --path --windows "$MAVEN_PROJECTBASEDIR"`
 fi
 
+
 WRAPPER_LAUNCHER=org.apache.maven.wrapper.MavenWrapperMain
 
 exec "$JAVACMD" \
