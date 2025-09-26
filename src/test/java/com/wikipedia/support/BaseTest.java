@@ -23,6 +23,7 @@ public void startBrowserSession() throws IOException {
                          "--disable-dev-shm-usage","--window-size=1920,1080");
     // optional if you ever hit origin issues
     options.addArguments("--remote-allow-origins=*");
+     WebDriver standard = new ChromeDriver(options);
     WebDriver healing = SelfHealingDriver.create(standard);
     threadLocalBrowser.set(healing);
 }
