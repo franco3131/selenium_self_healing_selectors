@@ -10,7 +10,6 @@ public class WikipediaResultsPage extends BasePage {
     public WikipediaResultsPage(WebDriver driver) {
         super(driver);
     }
-
     public Boolean doesSearchedTextDisplayTopResults(int rows,String word) {
     	String sentence = "";
     	for(int i=1;i<=rows;i++) {
