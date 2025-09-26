@@ -8,7 +8,11 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.io.IOException;   
+import java.io.IOException;  
+import org.testng.ITestResult;
+import org.testng.annotations.AfterMethod;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.OutputType;
 
 public class BaseTest {
 
@@ -36,8 +40,26 @@ public void startBrowserSession() throws IOException {
             threadLocalBrowser.remove();
         }
     }
-
+    @AfterMethod
+    public void tearDown(ITestResult result) {
+        WebDriver driver = getCurrentBrowser();
+        if (driver != null && !result.isSuccess()) {
+            takeScreenshot(driver, result.getName());
+        }
+    }
     public static WebDriver getCurrentBrowser() {
         return threadLocalBrowser.get();
+    }
+    private void takeScreenshot(WebDriver driver, String testName) {
+    try {
+        Path dir = Paths.get("target", "screenshots");
+        Files.createDirectories(dir);
+        File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+        Path dest = dir.resolve(testName + ".png");
+        Files.copy(src.toPath(), dest);
+        System.out.println("Saved screenshot: " + dest.toAbsolutePath());
+    } catch (IOException e) {
+        System.err.println("Could not save screenshot: " + e.getMessage());
+    }
     }
 }
