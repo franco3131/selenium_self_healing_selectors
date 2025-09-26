@@ -57,6 +57,14 @@ jobs:
           docker compose logs > artifacts/docker-logs/compose.log || true
           docker compose ps   > artifacts/docker-logs/ps.txt || true
 
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: target/screenshots/**
+
       - name: Upload test reports and Healenium report
         if: always()
         uses: actions/upload-artifact@v4
