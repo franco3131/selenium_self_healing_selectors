@@ -32,7 +32,7 @@ jobs:
             (curl -sf http://127.0.0.1:7878/actuator/health | grep -q '"status":"UP"') && OK1=1 || OK1=0
             (curl -sf http://127.0.0.1:8000/health >/dev/null 2>&1) && OK2=1 || OK2=0
             if [ $OK1 -eq 1 ] && [ $OK2 -eq 1 ]; then echo "Healenium is up"; break; fi
-            sleep 2
+            sleep 5
           done
           docker ps
 
