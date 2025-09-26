@@ -53,15 +53,16 @@ public void startBrowserSession() throws IOException {
         return threadLocalBrowser.get();
     }
     private void takeScreenshot(WebDriver driver, String testName) {
-    try {
-        Path dir = Paths.get("target", "screenshots");
-        Files.createDirectories(dir);
-        File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        Path dest = dir.resolve(testName + ".png");
-        Files.copy(src.toPath(), dest);
-        System.out.println("Saved screenshot: " + dest.toAbsolutePath());
-    } catch (IOException e) {
-        System.err.println("Could not save screenshot: " + e.getMessage());
+        try {
+            Path dir = Paths.get("target", "screenshots");
+            Files.createDirectories(dir);
+            File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+            Path dest = dir.resolve(testName + ".png");
+            Files.copy(src.toPath(), dest);
+            System.out.println("Saved screenshot: " + dest.toAbsolutePath());
+        } catch (IOException e) {
+            System.err.println("Could not save screenshot: " + e.getMessage());
+        }
     }
-    }
+    
 }
