@@ -17,14 +17,12 @@ public class BaseTest {
 @Before(order = 0)
 public void startBrowserSession() throws IOException {
     ChromeOptions options = new ChromeOptions();
-
     Path tmpProfile = Files.createTempDirectory("gha-chrome-profile-");
     options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath());
-
-    options.addArguments("--headless=new", "--window-size=1440,692",
-                         "--remote-allow-origins=*");
-
-    WebDriver standard = new ChromeDriver(options);
+    options.addArguments("--headless=new","--disable-gpu","--no-sandbox",
+                         "--disable-dev-shm-usage","--window-size=1920,1080");
+    // optional if you ever hit origin issues
+    options.addArguments("--remote-allow-origins=*");
     WebDriver healing = SelfHealingDriver.create(standard);
     threadLocalBrowser.set(healing);
 }
