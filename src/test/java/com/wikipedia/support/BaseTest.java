@@ -44,28 +44,11 @@ public void startBrowserSession() throws IOException {
             threadLocalBrowser.remove();
         }
     }
-    @AfterMethod
-    public void tearDown(ITestResult result) {
-        WebDriver driver = getCurrentBrowser();
-        if (driver != null && !result.isSuccess()) {
-            takeScreenshot(driver, result.getName());
-        }
-    }
+    
     public static WebDriver getCurrentBrowser() {
         return threadLocalBrowser.get();
     }
-    private void takeScreenshot(WebDriver driver, String testName) {
-        try {
-            Path dir = Paths.get("target", "screenshots");
-            Files.createDirectories(dir);
-            File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            Path dest = dir.resolve(testName + ".png");
-            Files.copy(src.toPath(), dest);
-            System.out.println("Saved screenshot: " + dest.toAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("Could not save screenshot: " + e.getMessage());
-        }
-    }
+
     @AfterMethod(alwaysRun = true)
 public void takeScreenshotOnFailure(ITestResult result) {
     WebDriver driver = getCurrentBrowser();
