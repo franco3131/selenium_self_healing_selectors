@@ -2,8 +2,6 @@ package com.wikipedia.support;
 
 import com.epam.healenium.SelfHealingDriver;
 import io.cucumber.java.After;
-import io.github.shelennium.healenium.events.HealingEvent;
-import io.github.shelennium.healenium.events.HealingEventListener;
 import io.cucumber.java.Before;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
