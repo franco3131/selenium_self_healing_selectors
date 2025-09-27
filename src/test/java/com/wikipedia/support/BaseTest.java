@@ -55,7 +55,7 @@ public void takeScreenshotOnFailure(ITestResult result) {
     if (driver != null && !result.isSuccess()) {
         try {
             File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            String filename = "screenshots/fail-" + result.getName() + "-" + System.currentTimeMillis() + ".png";
+            String filename = "target/screenshots/fail-" + result.getName() + "-" + System.currentTimeMillis() + ".png";
             File dest = new File(filename);
             dest.getParentFile().mkdirs(); // make sure dir exists
             Files.copy(src.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
