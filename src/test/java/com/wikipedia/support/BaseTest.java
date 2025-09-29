@@ -36,7 +36,7 @@ public void startBrowserSession() throws IOException {
     
 }
 
-    @After(order = 0)
+    @After(order = 1)
     public void endBrowserSession() {
         WebDriver activeBrowserDriver = threadLocalBrowser.get();
         if (activeBrowserDriver != null) {
@@ -49,10 +49,10 @@ public void startBrowserSession() throws IOException {
         return threadLocalBrowser.get();
     }
 
-    @AfterMethod(alwaysRun = true)
+    @AfterMethod(order = 0)
 public void takeScreenshotOnFailure(ITestResult result) {
     System.out.println("hiiiii");
-    WebDriver driver = getCurrentBrowser();
+    WebDriver driver = threadLocalBrowser.get();
         System.out.println("hiiii2");
     if (driver != null && !result.isSuccess()) {
         try {
