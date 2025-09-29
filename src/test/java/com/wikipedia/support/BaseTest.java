@@ -49,7 +49,7 @@ public void startBrowserSession() throws IOException {
         return threadLocalBrowser.get();
     }
 
-    @AfterMethod(order = 0)
+    @After(order = 0)
 public void takeScreenshotOnFailure(ITestResult result) {
     System.out.println("hiiiii");
     WebDriver driver = threadLocalBrowser.get();
