@@ -6,6 +6,7 @@ import io.cucumber.java.Before;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import io.cucumber.java.Scenario;
 import java.nio.file.Files;
 import java.io.File;
 import java.nio.file.Path;
