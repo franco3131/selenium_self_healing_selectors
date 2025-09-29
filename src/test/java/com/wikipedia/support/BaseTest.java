@@ -39,7 +39,7 @@ public void startBrowserSession() throws IOException {
 
    // Uses your BaseTest.getCurrentBrowser() thread-local accessor
     private WebDriver getDriver() {
-        return BaseTest.getCurrentBrowser();
+        return threadLocalBrowser.get();;
     }
 
     /**
