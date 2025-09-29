@@ -95,7 +95,7 @@ public void startBrowserSession() throws IOException {
                 driver.quit();
             } catch (Throwable ignored) {}
             // If you manage the ThreadLocal here, remove it
-            BaseTest.removeCurrentBrowserIfPresent(); // see note below
+              threadLocalBrowser.remove();
         }
     }
 
