@@ -51,10 +51,13 @@ public void startBrowserSession() throws IOException {
 
     @AfterMethod(alwaysRun = true)
 public void takeScreenshotOnFailure(ITestResult result) {
+    System.out.println("hiiiii");
     WebDriver driver = getCurrentBrowser();
+        System.out.println("hiiii2");
     if (driver != null && !result.isSuccess()) {
         try {
             File src = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                System.out.println("hiiiii3");
             String filename = "target/screenshots/fail-" + result.getName() + "-" + System.currentTimeMillis() + ".png";
             File dest = new File(filename);
             dest.getParentFile().mkdirs(); // make sure dir exists
