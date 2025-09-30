@@ -62,7 +62,7 @@ public void startBrowserSession() throws IOException {
 
         WebDriver raw = unwrap(driver);
 
-        try {
+        // try {
             if (scenario.isFailed()) {
                         System.out.println("here11");
             logger.fine("here22");
@@ -85,14 +85,14 @@ public void startBrowserSession() throws IOException {
                 Files.write(dest, screenshotBytes);
                 System.out.println("[CucumberHooks] Screenshot saved to: " + dest.toAbsolutePath());
             }
-        } catch (ClassCastException e) {
-            // driver doesn't support screenshots
-            System.err.println("[CucumberHooks] Driver doesn't support screenshots: " + e.getMessage());
-        } catch (IOException e) {
-            System.err.println("[CucumberHooks] Failed to write screenshot: " + e.getMessage());
-        } catch (Throwable t) {
-            System.err.println("[CucumberHooks] Unexpected error taking screenshot: " + t.getMessage());
-        }
+        // } catch (ClassCastException e) {
+        //     // driver doesn't support screenshots
+        //     System.err.println("[CucumberHooks] Driver doesn't support screenshots: " + e.getMessage());
+        // } catch (IOException e) {
+        //     System.err.println("[CucumberHooks] Failed to write screenshot: " + e.getMessage());
+        // } catch (Throwable t) {
+        //     System.err.println("[CucumberHooks] Unexpected error taking screenshot: " + t.getMessage());
+        // }
     }
 
     private static WebDriver unwrap(WebDriver driver) {
