@@ -60,30 +60,27 @@ public void startBrowserSession() throws IOException {
             return;
         }
 
-        WebDriver raw = unwrap(driver);
+       WebDriver raw = unwrap(driver);               // your unwrap(driver) that peels WrapsDriver
+        WebDriver shotDriver = raw;
 
-        // try {
-            if (scenario.isFailed()) {
-                        System.out.println("here11");
-            logger.fine("here22");
-                // attach bytes to Cucumber report
-                byte[] screenshotBytes = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
-                scenario.attach(screenshotBytes, "image/png", scenario.getName());
- System.out.println("here12");
-                // also save to disk so CI can upload as artifact
-                Path screenshotsDir = Path.of("target", "screenshots");
-                 System.out.println("here11");
-                Files.createDirectories(screenshotsDir);
- System.out.println("here13");
-                // safe file name
-                String fileName = scenario.getName()
-                        .replaceAll("[^a-zA-Z0-9-_\\.]", "_")
-                        + "_" + System.currentTimeMillis() + ".png";
-                Path dest = screenshotsDir.resolve(fileName);
- System.out.println("here14");
-                // write bytes
-                Files.write(dest, screenshotBytes);
-                System.out.println("[CucumberHooks] Screenshot saved to: " + dest.toAbsolutePath());
+        // Some remote drivers need Augmenter to expose TakesScreenshot
+        if (!(shotDriver instanceof TakesScreenshot)) {
+            shotDriver = new Augmenter().augment(shotDriver);
+        }
+
+        if (shotDriver instanceof TakesScreenshot) {
+            byte[] png = ((TakesScreenshot) shotDriver).getScreenshotAs(OutputType.BYTES);
+
+            // 1) attach to Cucumber report
+            scenario.attach(png, "image/png", scenario.getName());
+
+            // 2) also save to disk for CI artifacts
+            Path dir = Paths.get("target", "screenshots");
+            Files.createDirectories(dir);
+            String safe = scenario.getName().replaceAll("[^a-zA-Z0-9-_\\.]", "_");
+            Path dest = dir.resolve(safe + "_" + System.currentTimeMillis() + ".png");
+            Files.write(dest, png);
+            System.out.println("[screenshot] saved: " + dest.toAbsolutePath());
             }
         // } catch (ClassCastException e) {
         //     // driver doesn't support screenshots
@@ -95,12 +92,13 @@ public void startBrowserSession() throws IOException {
         // }
     }
 
-    private static WebDriver unwrap(WebDriver driver) {
-    WebDriver d = driver;
-    while (d instanceof WrapsDriver) {
-        d = ((WrapsDriver) d).getWrappedDriver();
+
+private static WebDriver unwrap(WebDriver d) {
+    WebDriver cur = d;
+    while (cur instanceof WrapsDriver) {
+        cur = ((WrapsDriver) cur).getWrappedDriver();
     }
-    return d;
+    return cur;
 }
     
     /**
