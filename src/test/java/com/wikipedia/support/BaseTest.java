@@ -59,12 +59,14 @@ public void startBrowserSession() throws IOException {
             return;
         }
 
+        WebDriver raw = unwrap(driver);
+
         try {
             if (scenario.isFailed()) {
                         System.out.println("here11");
             logger.fine("here22");
                 // attach bytes to Cucumber report
-                byte[] screenshotBytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+                byte[] screenshotBytes = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
                 scenario.attach(screenshotBytes, "image/png", scenario.getName());
 
                 // also save to disk so CI can upload as artifact
@@ -91,6 +93,14 @@ public void startBrowserSession() throws IOException {
         }
     }
 
+    private static WebDriver unwrap(WebDriver driver) {
+    WebDriver d = driver;
+    while (d instanceof WrapsDriver) {
+        d = ((WrapsDriver) d).getWrappedDriver();
+    }
+    return d;
+}
+    
     /**
      * Run after screenshot hook — quit the browser here so screenshot is still possible.
      */
