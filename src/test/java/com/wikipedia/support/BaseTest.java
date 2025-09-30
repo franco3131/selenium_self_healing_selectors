@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 public class BaseTest {
 
     private static final ThreadLocal<WebDriver> threadLocalBrowser = new ThreadLocal<>();
+     private static final Logger logger = Logger.getLogger(MyClass.class.getName());
 
 @Before(order = 0)
 public void startBrowserSession() throws IOException {
