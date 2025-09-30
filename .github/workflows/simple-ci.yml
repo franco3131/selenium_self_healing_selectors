@@ -1,6 +1,5 @@
 name: simple run
 on:
-  push:
   workflow_dispatch:
 
 jobs:
