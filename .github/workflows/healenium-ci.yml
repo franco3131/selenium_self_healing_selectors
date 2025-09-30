@@ -38,7 +38,7 @@ jobs:
           docker ps
 
       - name: wait an extra 15 to make sure everything is up and running
-        run: sleep 15
+        run: sleep 5
 
       - name: Run baseline (seed selectors)
         env:
