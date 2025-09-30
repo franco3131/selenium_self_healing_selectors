@@ -69,17 +69,18 @@ public void startBrowserSession() throws IOException {
                 // attach bytes to Cucumber report
                 byte[] screenshotBytes = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
                 scenario.attach(screenshotBytes, "image/png", scenario.getName());
-
+ System.out.println("here12");
                 // also save to disk so CI can upload as artifact
                 Path screenshotsDir = Path.of("target", "screenshots");
+                 System.out.println("here11");
                 Files.createDirectories(screenshotsDir);
-
+ System.out.println("here13");
                 // safe file name
                 String fileName = scenario.getName()
                         .replaceAll("[^a-zA-Z0-9-_\\.]", "_")
                         + "_" + System.currentTimeMillis() + ".png";
                 Path dest = screenshotsDir.resolve(fileName);
-
+ System.out.println("here14");
                 // write bytes
                 Files.write(dest, screenshotBytes);
                 System.out.println("[CucumberHooks] Screenshot saved to: " + dest.toAbsolutePath());
