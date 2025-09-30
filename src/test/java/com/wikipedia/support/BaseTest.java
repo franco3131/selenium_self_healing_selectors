@@ -17,8 +17,7 @@ import org.testng.annotations.AfterMethod;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
 import java.nio.file.StandardCopyOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 public class BaseTest {
 
@@ -52,7 +51,8 @@ public void startBrowserSession() throws IOException {
     @After(order = 1)
     public void takeScreenshotIfFailed(Scenario scenario) {
         System.out.println("here");
-        logger.debug("here2");
+        logger.fine("here2");
+
         WebDriver driver = getDriver();
         if (driver == null) {
             return;
@@ -61,7 +61,7 @@ public void startBrowserSession() throws IOException {
         try {
             if (scenario.isFailed()) {
                         System.out.println("here11");
-            logger.debug("here22");
+            logger.fine("here22");
                 // attach bytes to Cucumber report
                 byte[] screenshotBytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
                 scenario.attach(screenshotBytes, "image/png", scenario.getName());
