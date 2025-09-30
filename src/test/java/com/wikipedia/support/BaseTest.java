@@ -49,6 +49,8 @@ public void startBrowserSession() throws IOException {
      */
     @After(order = 1)
     public void takeScreenshotIfFailed(Scenario scenario) {
+        System.out.println("here");
+        logging.debug("here2");
         WebDriver driver = getDriver();
         if (driver == null) {
             return;
@@ -56,6 +58,8 @@ public void startBrowserSession() throws IOException {
 
         try {
             if (scenario.isFailed()) {
+                        System.out.println("here");
+        logging.debug("here2");
                 // attach bytes to Cucumber report
                 byte[] screenshotBytes = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
                 scenario.attach(screenshotBytes, "image/png", scenario.getName());
