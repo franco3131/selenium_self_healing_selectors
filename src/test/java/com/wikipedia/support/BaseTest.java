@@ -18,6 +18,7 @@ import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
+import org.openqa.selenium.WrapsDriver;
 
 public class BaseTest {
 
