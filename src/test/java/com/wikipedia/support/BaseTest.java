@@ -51,7 +51,7 @@ public void startBrowserSession() throws IOException {
      * Run first (higher order) — take and attach screenshot if scenario failed.
      */
     @After(order = 1)
-    public void takeScreenshotIfFailed(Scenario scenario) {
+    public void takeScreenshotIfFailed(Scenario scenario) throws IOException{
         System.out.println("here");
         logger.fine("here2");
 
