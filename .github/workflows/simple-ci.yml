@@ -1,0 +1,59 @@
+name: simple run
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable   # or pin e.g. "120" to match your local
+
+
+
+      - name: Run baseline (seed selectors)
+        env:
+          # Headless Chrome for CI
+          SELENIUM_HEADLESS: "true"
+        run: |
+          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@baseline" test
+
+
+      - name: Collect docker logs
+        if: always()
+        run: |
+          mkdir -p artifacts/docker-logs
+          docker compose logs > artifacts/docker-logs/compose.log || true
+          docker compose ps   > artifacts/docker-logs/ps.txt || true
+
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-screenshots
+          path: target/screenshots/**
+
+      - name: Upload test reports and Healenium report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-and-healenium
+          path: |
+            target/surefire-reports/**
+            target/cucumber-reports/**
+            artifacts/docker-logs/**
