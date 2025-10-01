@@ -61,12 +61,6 @@ jobs:
           docker compose ps   > artifacts/docker-logs/ps.txt || true
 
 
-      - name: Upload screenshots
-        uses: actions/upload-artifact@v4
-        with:
-          name: screenshots
-          path: target/screenshots
-          
       - name: List screenshots (debug)
         if: always()
         run: |
