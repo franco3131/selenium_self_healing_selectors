@@ -67,7 +67,22 @@ jobs:
         with:
           name: screenshots
           path: target/screenshots
-
+          
+      - name: List screenshots (debug)
+        if: always()
+        run: |
+          echo "PWD=$(pwd)"
+          ls -la target || true
+          ls -la target/screenshots || true
+      
+      - name: Upload screenshots (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: target/screenshots/**
+          if-no-files-found: warn
+          
       - name: Upload test reports and Healenium report
         if: always()
         uses: actions/upload-artifact@v4
