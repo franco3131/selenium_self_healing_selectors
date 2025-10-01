@@ -3,6 +3,7 @@ package com.wikipedia.support;
 import com.epam.healenium.SelfHealingDriver;
 import io.cucumber.java.After;
 import io.cucumber.java.Before;
+import org.openqa.selenium.HasCapabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
