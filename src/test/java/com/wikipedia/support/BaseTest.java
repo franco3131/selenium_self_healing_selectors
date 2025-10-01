@@ -53,12 +53,12 @@ public class BaseTest {
      * Runs BEFORE quitting the browser.
      */
     @After(order = 1)
-    public void attachScreenshotIfFailed(Scenario scenario) {
+    public void attachScreenshotIfFailed(Scenario scenario) throws Exception {
         if (!scenario.isFailed()) return;
 
         WebDriver raw = getRawBrowser();
         if (raw instanceof TakesScreenshot) {
-            try {
+       
                 byte[] png = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
 
                 // 1) Attach to Cucumber report
@@ -71,9 +71,7 @@ public class BaseTest {
                 Path dest = dir.resolve(safe + "_" + System.currentTimeMillis() + ".png");
                 Files.write(dest, png);
                 System.out.println("[screenshot] saved: " + dest.toAbsolutePath());
-            } catch (Exception e) {
-                System.err.println("[screenshot] failed: " + e);
-            }
+     
         } else {
             System.err.println("[screenshot] RAW driver not TakesScreenshot: "
                     + (raw == null ? "null" : raw.getClass().getName()));
