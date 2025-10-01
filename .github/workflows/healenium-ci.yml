@@ -50,7 +50,6 @@ jobs:
       - name: Run healing scenario (mutate DOM; expect heal)
         env:
           SELENIUM_HEADLESS: "true"
-          DEMO_BREAK: "true"   
         run: |
           mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@healing" test
 
