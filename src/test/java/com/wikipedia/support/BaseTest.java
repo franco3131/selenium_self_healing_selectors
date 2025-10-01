@@ -48,59 +48,57 @@ public void startBrowserSession() throws IOException {
     public static WebDriver getCurrentBrowser() {
         return threadLocalBrowser.get();
     }
-    /**
-     * Run first (higher order) — take and attach screenshot if scenario failed.
-     */
-    @After(order = 1)
-    public void takeScreenshotIfFailed(Scenario scenario) throws IOException{
-        System.out.println("here");
-        logger.fine("here2");
+@After(order = 1)
+public void attachScreenshotIfFailed(Scenario scenario) throws Exception {
+    if (!scenario.isFailed()) return;
 
-        WebDriver driver = getDriver();
-        if (driver == null) {
-            return;
+    WebDriver driver = BaseTest.getCurrentBrowser();
+    if (driver == null) return;
+
+
+        WebDriver raw = unwrapToRealDriver(driver);
+
+        byte[] png = null;
+
+        // 1) direct if supported
+        if (raw instanceof TakesScreenshot) {
+            png = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
+        } else if (raw instanceof HasCapabilities) {
+            // 2) augment only when capabilities are present
+            WebDriver augmented = new Augmenter().augment(raw);
+            if (augmented instanceof TakesScreenshot) {
+                png = ((TakesScreenshot) augmented).getScreenshotAs(OutputType.BYTES);
+            }
+        } else {
+            System.err.println("[screenshot] driver is neither TakesScreenshot nor HasCapabilities: "
+                               + raw.getClass().getName());
         }
 
-       WebDriver raw = unwrap(driver);               // your unwrap(driver) that peels WrapsDriver
-        WebDriver shotDriver = raw;
-
-        // Some remote drivers need Augmenter to expose TakesScreenshot
-        if (!(shotDriver instanceof TakesScreenshot)) {
-            shotDriver = new Augmenter().augment(shotDriver);
-        }
-
-        if (shotDriver instanceof TakesScreenshot) {
-            byte[] png = ((TakesScreenshot) shotDriver).getScreenshotAs(OutputType.BYTES);
-
-            // 1) attach to Cucumber report
+        if (png != null) {
             scenario.attach(png, "image/png", scenario.getName());
-
-            // 2) also save to disk for CI artifacts
             Path dir = Paths.get("target", "screenshots");
             Files.createDirectories(dir);
             String safe = scenario.getName().replaceAll("[^a-zA-Z0-9-_\\.]", "_");
             Path dest = dir.resolve(safe + "_" + System.currentTimeMillis() + ".png");
             Files.write(dest, png);
             System.out.println("[screenshot] saved: " + dest.toAbsolutePath());
-            }
-        // } catch (ClassCastException e) {
-        //     // driver doesn't support screenshots
-        //     System.err.println("[CucumberHooks] Driver doesn't support screenshots: " + e.getMessage());
-        // } catch (IOException e) {
-        //     System.err.println("[CucumberHooks] Failed to write screenshot: " + e.getMessage());
-        // } catch (Throwable t) {
-        //     System.err.println("[CucumberHooks] Unexpected error taking screenshot: " + t.getMessage());
-        // }
-    }
+        }
+    } 
+}
 
-
-private static WebDriver unwrap(WebDriver d) {
+private static WebDriver unwrapToRealDriver(WebDriver d) {
     WebDriver cur = d;
+    // unwrap nested wrappers (SelfHealingDriver, listeners, etc.)
     while (cur instanceof WrapsDriver) {
-        cur = ((WrapsDriver) cur).getWrappedDriver();
+        WebDriver next = ((WrapsDriver) cur).getWrappedDriver();
+        if (next == cur) break; // safety
+        cur = next;
     }
     return cur;
 }
+
+
+    
     
     /**
      * Run after screenshot hook — quit the browser here so screenshot is still possible.
