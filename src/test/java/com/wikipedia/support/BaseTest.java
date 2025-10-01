@@ -19,6 +19,7 @@ import org.openqa.selenium.OutputType;
 import java.nio.file.StandardCopyOption;
 import java.util.logging.Logger;
 import org.openqa.selenium.WrapsDriver;
+import org.openqa.selenium.remote.Augmenter;
 
 public class BaseTest {
 
