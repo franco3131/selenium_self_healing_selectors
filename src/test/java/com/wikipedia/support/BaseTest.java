@@ -83,7 +83,7 @@ public void attachScreenshotIfFailed(Scenario scenario) throws Exception {
             Files.write(dest, png);
             System.out.println("[screenshot] saved: " + dest.toAbsolutePath());
         }
-    } 
+    
 }
 
 private static WebDriver unwrapToRealDriver(WebDriver d) {
