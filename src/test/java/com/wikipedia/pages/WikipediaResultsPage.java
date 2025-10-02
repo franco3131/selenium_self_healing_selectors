@@ -13,12 +13,11 @@ public class WikipediaResultsPage extends BasePage {
     public Boolean doesSearchedTextDisplayTopResults(int rows,String word) {
     	String sentence = "";
     	for(int i=1;i<=rows;i++) {
-    		System.out.println("body > div > a > div > a:nth-child("+i+") > div > p:nth-child(1)");
-    		System.out.println("1");
+    		System.out.println("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)");
     		waitForVisible(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div"));
-    		System.out.println("2");
-    		sentence = driver.findElement(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div")).getText();
+    		sentence = driver.findElement(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)")).getText();
     		System.out.println(sentence);
+            System.out.println(word);
     		if(!sentence.toLowerCase().contains(word)) {
     			return false;
     		}
