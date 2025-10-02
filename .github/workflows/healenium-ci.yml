@@ -47,6 +47,9 @@ jobs:
         run: |
           mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@baseline" test
 
+      - name: wait an extra 15 to make sure everything is up and running
+        run: sleep 5
+
       - name: Run healing scenario (mutate DOM; expect heal)
         env:
           SELENIUM_HEADLESS: "true"
