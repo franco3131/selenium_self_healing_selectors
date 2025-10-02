@@ -37,6 +37,7 @@ public class BaseTest {
                              "--disable-dev-shm-usage","--window-size=1920,1080");
         // optional if you ever hit origin issues
         options.addArguments("--remote-allow-origins=*");
+         options.addArguments("--disable-infobars");
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.setExperimentalOption("useAutomationExtension", false);
 
