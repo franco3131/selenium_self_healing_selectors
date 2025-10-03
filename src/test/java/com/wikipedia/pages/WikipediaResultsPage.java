@@ -40,6 +40,7 @@ public class WikipediaResultsPage extends BasePage {
     		}
 
         }
+            return true;
     }
     
 }
