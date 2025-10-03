@@ -43,3 +43,4 @@ public class WikipediaResultsPage extends BasePage {
     }
     
 }
+}
