@@ -2,6 +2,7 @@ package com.wikipedia.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.JavascriptExecutor;
 
 public class WikipediaHomePage extends BasePage {
 
