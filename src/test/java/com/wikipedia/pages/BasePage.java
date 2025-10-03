@@ -21,7 +21,7 @@ public abstract class BasePage {
     }
 
     public void goToWikipediaPage() {
-        this.driver.get("https://rawcdn.githack.com/franco3131/Wikipedia-Search-Machine-Javascript/af302b19cccae8a0839be51b5a2d53720448c838/WikipediaSearch/HTML/WikipediaSearch.html");
+        this.driver.get("https://rawcdn.githack.com/franco3131/Wikipedia-Search-Machine-Javascript/c1ea6285fb8620aa65be520bff6d667f42f75d80/WikipediaSearch/HTML/WikipediaSearch.html");
         
     }
 
