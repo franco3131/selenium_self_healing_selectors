@@ -40,6 +40,7 @@ public class BaseTest {
          options.addArguments("--disable-infobars");
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.setExperimentalOption("useAutomationExtension", false);
+        options.addArguments("--allow-file-access-from-files","--disable-web-security");
 
         // 1) Create the real Selenium driver and keep it for screenshots
         WebDriver raw = new ChromeDriver(options);
