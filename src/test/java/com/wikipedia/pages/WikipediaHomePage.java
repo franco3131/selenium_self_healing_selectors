@@ -20,8 +20,14 @@ public class WikipediaHomePage extends BasePage {
         type(searchInput,text);
     }
     public void clickOnGoButton() {
+        try{
     	waitForVisible(goButton);
     	click(goButton);
+        }catch(Exception e){
+        ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
+        waitForVisible(goButton);
+    	click(goButton);
+        }
     }
 
 }
