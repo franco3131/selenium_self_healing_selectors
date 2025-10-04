@@ -22,12 +22,13 @@ public class WikipediaHomePage extends BasePage {
     }
     public void clickOnGoButton() {
         try{
-    	waitForVisible(goButton);
-    	click(goButton);
+        	waitForVisible(goButton);
+        	click(goButton);
         }catch(Exception e){
-        ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
-        waitForVisible(goButton);
-    	click(goButton);
+            //unfocus from red box error that shows up for chrome from time to time and try again
+            ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
+            waitForVisible(goButton);
+        	click(goButton);
         }
     }
 
