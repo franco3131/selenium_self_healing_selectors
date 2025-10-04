@@ -28,7 +28,7 @@ public class WikipediaResultsPage extends BasePage {
     
     public Boolean doesSearchedTextDisplayTopResults(int rows,String word) {
         try{
-         return isWordPresentInFirstNRows(rows, word);
+         return isWordPresentInFirstNRow(rows, word);
         }catch(Exception e){
             //unfocus on red box error and try again
         ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
