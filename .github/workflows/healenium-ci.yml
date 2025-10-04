@@ -23,7 +23,7 @@ jobs:
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
-          chrome-version: stable   # or pin e.g. "120" to match your local
+          chrome-version: stable  
 
       - name: Start Healenium via docker-compose
         run: |
