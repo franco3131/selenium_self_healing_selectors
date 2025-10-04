@@ -13,7 +13,7 @@ public class WikipediaResultsPage extends BasePage {
         super(driver);
     }
 
-    public Boolean isWordPresentInFirstNRow(int rows, String word) throws Exception{
+    public Boolean isWordPresentInFirstNRow(int rows, String word) {
         	String sentence = "";
         	for(int i=1;i<=rows;i++) {
         		waitForVisible(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div"));
@@ -28,11 +28,11 @@ public class WikipediaResultsPage extends BasePage {
     
     public Boolean doesSearchedTextDisplayTopResults(int rows,String word) {
         try{
-         return isWordPresentInFirstNRow(rows, word);
+             return isWordPresentInFirstNRow(rows, word);
         }catch(Exception e){
             //unfocus on red box error and try again
-        ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
-        return isWordPresentInFirstNRow(rows, word);
+            ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
+            return isWordPresentInFirstNRow(rows, word);
         }
     
 }
