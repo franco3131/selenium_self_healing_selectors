@@ -65,6 +65,15 @@ jobs:
             -c "SELECT uid, class_name, method_name, locator, url, create_date
                 FROM selector ORDER BY create_date DESC LIMIT 15;"
 
+      - name: Dump Healenium healed selectors (psql)
+        if: always()
+        run: |
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT uid, old_locator, new_locator, score, create_date
+                FROM healing_result ORDER BY create_date DESC LIMIT 15;" \
+            > artifacts/docker-logs/healing-result.txt || true
+
 
       - name: List screenshots (debug)
         if: always()
