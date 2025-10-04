@@ -56,13 +56,13 @@ jobs:
           mkdir -p artifacts/docker-logs
           docker compose logs > artifacts/docker-logs/compose.log || true
           docker compose ps   > artifacts/docker-logs/ps.txt || true
-
+          
       - name: Show Healenium selectors (psql)
         if: always()
         run: |
           docker compose exec -T postgres \
             psql -U healenium -d healenium \
-            -c "SELECT id, class_name, method_name, locator, url, create_date
+            -c "SELECT uid, class_name, method_name, locator, url, create_date
                 FROM selector ORDER BY create_date DESC LIMIT 15;"
 
 
