@@ -19,7 +19,7 @@ public class WikipediaResultsPage extends BasePage {
         		waitForVisible(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div"));
         		sentence = driver.findElement(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)")).getText();
         		System.out.println("the sentence from element is " + sentence+" and expected word contained is"+ word);
-        		if(!sentence.toLowerCase().contains(word)) {
+        		if(!sentence.toLowerCase().contains(word.toLowerCase())) {
         			return false;
         		}
         	}
