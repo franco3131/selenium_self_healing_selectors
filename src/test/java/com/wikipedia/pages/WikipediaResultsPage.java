@@ -12,36 +12,28 @@ public class WikipediaResultsPage extends BasePage {
     public WikipediaResultsPage(WebDriver driver) {
         super(driver);
     }
+
+    public Boolean searchTopNResultsForWord(int rows, String word) throws Exception{
+        	String sentence = "";
+        	for(int i=1;i<=rows;i++) {
+        		waitForVisible(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div"));
+        		sentence = driver.findElement(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)")).getText();
+        		System.out.println("the sentence from element is " + sentence+" and expected word contained is"+ word);
+        		if(!sentence.toLowerCase().contains(word)) {
+        			return false;
+        		}
+        	}
+        	return true;
+    }
+    
     public Boolean doesSearchedTextDisplayTopResults(int rows,String word) {
         try{
-    	String sentence = "";
-    	for(int i=1;i<=rows;i++) {
-    		System.out.println("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)");
-    		waitForVisible(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div"));
-    		sentence = driver.findElement(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)")).getText();
-    		System.out.println(sentence);
-            System.out.println(word);
-    		if(!sentence.toLowerCase().contains(word)) {
-    			return false;
-    		}
-    	}
-    	return true;
+         searchTopNResultsForWord(rows, word);
         }catch(Exception e){
-    ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
-    	String sentence = "";
-    	for(int i=1;i<=rows;i++) {
-    		System.out.println("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)");
-    		waitForVisible(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div"));
-    		sentence = driver.findElement(By.cssSelector("body > div > a > div > a:nth-child("+i+") > div>p>b:nth-child(1)")).getText();
-    		System.out.println(sentence);
-            System.out.println(word);
-    		if(!sentence.toLowerCase().contains(word)) {
-    			return false;
-    		}
-
+            //unfocus on red box error and try again
+        ((JavascriptExecutor) driver).executeScript("document.activeElement.blur();");
+        searchTopNResultsForWord(rows, word);
         }
-            return true;
-    }
     
 }
 }
