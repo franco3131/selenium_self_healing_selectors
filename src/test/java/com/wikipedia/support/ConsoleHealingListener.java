@@ -1,16 +1,20 @@
 package com.wikipedia.support;
 
-import com.epam.healenium.handlers.HealingListener;
-import com.epam.healenium.model.HealingResult;
+import com.epam.healenium.SelfHealingDriver;
+import com.epam.healenium.event.HealingEvent;
+import com.epam.healenium.event.HealingListenerAdapter;
 
-public class ConsoleHealingListener implements HealingListener {
+public class ConsoleHealingListener extends HealingListenerAdapter {
+
     @Override
-    public void onSuccess(HealingResult r) {
-        System.out.println("[HEAL] ✅ " + r.getLocator() + "  →  " + r.getNewLocator()
-                + " (score=" + String.format("%.3f", r.getScore()) + ")");
+    public void onHealed(HealingEvent event) {
+        System.out.println("[HEAL] ✅ " + event.getLocator() +
+                "  →  " + event.getHealedLocator() +
+                " (score=" + String.format("%.3f", event.getScore()) + ")");
     }
+
     @Override
-    public void onFailure(HealingResult r) {
-        System.out.println("[HEAL] ❌ healing failed for " + r.getLocator());
+    public void onHealingFailed(HealingEvent event) {
+        System.out.println("[HEAL] ❌ Healing failed for: " + event.getLocator());
     }
 }
