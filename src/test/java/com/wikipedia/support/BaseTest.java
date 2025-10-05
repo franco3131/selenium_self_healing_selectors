@@ -45,11 +45,12 @@ public class BaseTest {
         threadLocalRaw.set(raw);
         WebDriver healing = SelfHealingDriver.create(raw);
         try {
-            healing.addListener(new com.wikipedia.support.ConsoleHealingListener());
-            System.out.println("[HEAL] Healing listener attached.");
-            } catch (Throwable t) {
-                System.out.println("[HEAL] Could not attach listener: " + t.getMessage());
-            }
+            healing.getEventPublisher().addListener(new com.wikipedia.support.ConsoleHealingListener());
+            System.out.println("[HEAL] Healing listener attached successfully.");
+        } catch (Throwable t) {
+            System.out.println("[HEAL] Could not attach healing listener: " + t.getMessage());
+        }
+
         threadLocalHealing.set(healing);
     }
 
