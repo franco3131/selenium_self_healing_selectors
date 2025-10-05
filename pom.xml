@@ -40,11 +40,11 @@
     <scope>test</scope>
   </dependency>
       <!-- Healenium Web (self-healing wrapper for Selenium) -->
-  <dependency>
-    <groupId>com.epam.healenium</groupId>
-    <artifactId>healenium-web</artifactId>
-    <version>${healenium.version}</version>
-  </dependency>
+<dependency>
+  <groupId>com.epam.healenium</groupId>
+  <artifactId>healenium-web</artifactId>
+  <version>3.3.1</version>
+</dependency>
   <dependency>
   <groupId>org.slf4j</groupId>
   <artifactId>slf4j-simple</artifactId>
