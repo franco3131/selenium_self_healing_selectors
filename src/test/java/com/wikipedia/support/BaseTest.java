@@ -44,13 +44,6 @@ public class BaseTest {
         WebDriver raw = new ChromeDriver(options);
         threadLocalRaw.set(raw);
         WebDriver healing = SelfHealingDriver.create(raw);
-        try {
-            healing.getEventPublisher().addListener(new com.wikipedia.support.ConsoleHealingListener());
-            System.out.println("[HEAL] Healing listener attached successfully.");
-        } catch (Throwable t) {
-            System.out.println("[HEAL] Could not attach healing listener: " + t.getMessage());
-        }
-
         threadLocalHealing.set(healing);
     }
 
