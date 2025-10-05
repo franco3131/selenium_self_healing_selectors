@@ -90,48 +90,6 @@ jobs:
           path: target/screenshots/**
           if-no-files-found: warn
 
-      - name: Dump Healenium selectors & heals (psql, tolerant)
-        if: always()
-        run: |
-          mkdir -p artifacts/docker-logs
-      
-          echo "== selector (newer schema) ==" | tee artifacts/docker-logs/selector.txt
-          docker compose exec -T postgres psql -U healenium -d healenium \
-            -c "SELECT uid, class_name, method_name, locator, url, create_date
-                FROM selector ORDER BY create_date DESC LIMIT 15;" \
-            >> artifacts/docker-logs/selector.txt 2>&1 || true
-      
-          echo "\n== selector (older schema, no url/uid) ==" >> artifacts/docker-logs/selector.txt
-          docker compose exec -T postgres psql -U healenium -d healenium \
-            -c "SELECT id, class_name, method_name, locator, create_date
-                FROM selector ORDER BY create_date DESC LIMIT 15;" \
-            >> artifacts/docker-logs/selector.txt 2>&1 || true
-      
-          echo "== healing_result (newer columns) ==" | tee artifacts/docker-logs/healing-result.txt
-          docker compose exec -T postgres psql -U healenium -d healenium \
-            -c "SELECT id, old_locator, new_locator, score, create_date
-                FROM healing_result ORDER BY create_date DESC LIMIT 15;" \
-            >> artifacts/docker-logs/healing-result.txt 2>&1 || true
-      
-          echo "\n== healing_result (older columns) ==" >> artifacts/docker-logs/healing-result.txt
-          docker compose exec -T postgres psql -U healenium -d healenium \
-            -c "SELECT id, original_locator, healed_locator, accuracy, create_date
-                FROM healing_result ORDER BY create_date DESC LIMIT 15;" \
-            >> artifacts/docker-logs/healing-result.txt 2>&1 || true
-      
-          echo "\n== legacy healingresult table (very old) ==" >> artifacts/docker-logs/healing-result.txt
-          docker compose exec -T postgres psql -U healenium -d healenium \
-            -c "SELECT id, original_locator, healed_locator, accuracy, create_date
-                FROM healingresult ORDER BY create_date DESC LIMIT 15;" \
-            >> artifacts/docker-logs/healing-result.txt 2>&1 || true
-
-      - name: Upload DB dumps
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: healenium-db
-          path: artifacts/docker-logs/**
-          
       - name: Upload test reports and Healenium report
         if: always()
         uses: actions/upload-artifact@v4
