@@ -41,21 +41,19 @@ public class BaseTest {
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.setExperimentalOption("useAutomationExtension", false);
         options.addArguments("--allow-file-access-from-files","--disable-web-security");
-
-        // 1) Create the real Selenium driver and keep it for screenshots
         WebDriver raw = new ChromeDriver(options);
         threadLocalRaw.set(raw);
-
-        // 2) Wrap with Healenium for normal test interactions
         WebDriver healing = SelfHealingDriver.create(raw);
+        try {
+            healing.addListener(new com.wikipedia.support.ConsoleHealingListener());
+            System.out.println("[HEAL] Healing listener attached.");
+            } catch (Throwable t) {
+                System.out.println("[HEAL] Could not attach listener: " + t.getMessage());
+            }
         threadLocalHealing.set(healing);
     }
 
-    /**
-     * Take and attach a screenshot if the scenario failed.
-     * Uses the RAW driver so we never hit proxy/TakesScreenshot casting issues.
-     * Runs BEFORE quitting the browser.
-     */
+
     @After(order = 1)
     public void attachScreenshotIfFailed(Scenario scenario) throws Exception {
         if (!scenario.isFailed()) return;
@@ -82,9 +80,6 @@ public class BaseTest {
         }
     }
 
-    /**
-     * Quit the browser after screenshots are handled.
-     */
     @After(order = 0)
     public void quitDriver() {
         WebDriver healing = threadLocalHealing.get();
@@ -92,7 +87,6 @@ public class BaseTest {
             try { healing.quit(); } catch (Exception ignored) {}
             threadLocalHealing.remove();
         }
-        // Clear RAW reference (healing.quit() usually closes the underlying driver too)
         threadLocalRaw.remove();
     }
 }
