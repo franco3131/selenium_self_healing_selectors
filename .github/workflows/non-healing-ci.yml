@@ -1,0 +1,76 @@
+name: Healenium demo
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+          
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable  
+
+
+      - name: Run baseline (seed selectors)
+        env:
+          # Headless Chrome for CI
+          SELENIUM_HEADLESS: "true"
+        run: |
+          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@baseline" test
+
+      - name: Run healing scenario (mutate DOM; expect heal)
+        env:
+          SELENIUM_HEADLESS: "true"
+        run: |
+          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@healing" test
+
+          
+
+      - name: List screenshots (debug)
+        if: always()
+        run: |
+          echo "PWD=$(pwd)"
+          ls -la target || true
+          ls -la target/screenshots || true
+      
+      - name: Upload screenshots (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: target/screenshots/**
+          if-no-files-found: warn
+
+    
+      - name: Upload DB dumps
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: healenium-db
+          path: artifacts/docker-logs/**
+          
+      - name: Upload test reports and Healenium report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-and-healenium
+          path: |
+            target/surefire-reports/**
+            target/cucumber-reports/**
+            target/healenium-report/** 
+            artifacts/docker-logs/**
