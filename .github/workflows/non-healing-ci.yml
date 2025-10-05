@@ -1,8 +1,6 @@
-name: Healenium demo
+name: Non healing run
 
 on:
-  push:
-  pull_request:
   workflow_dispatch:
 
 jobs:
