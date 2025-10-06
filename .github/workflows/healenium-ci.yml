@@ -48,7 +48,11 @@ jobs:
         env:
           SELENIUM_HEADLESS: "true"
         run: |
-          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@healing" test
+          mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@healing" test \
+            -Dorg.slf4j.simpleLogger.showDateTime=true \
+            -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS \
+            -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
+            -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
 
       - name: Collect docker logs
         if: always()
