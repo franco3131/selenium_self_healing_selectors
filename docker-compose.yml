@@ -20,23 +20,25 @@ services:
 
   healenium-backend:
     image: healenium/hlm-backend:3.4.9
+    # platform: linux/amd64   # ← uncomment on Apple Silicon if needed
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
-      # DB profile & connection
-      SPRING_PROFILES_ACTIVE: postgres
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/healenium
-      SPRING_DATASOURCE_USERNAME: healenium
-      SPRING_DATASOURCE_PASSWORD: healenium
+      # Postgres connection (match postgres service)
+      SPRING_POSTGRES_DB: healenium
+      SPRING_POSTGRES_SCHEMA: public
+      SPRING_POSTGRES_USER: healenium
+      SPRING_POSTGRES_PASSWORD: healenium
+      SPRING_POSTGRES_DB_HOST: postgres
 
-      # ✅ turn on saving healing events & reports
-      SAVE_HEALING_RESULTS: "true"
-      SAVE_HEALING_REPORT: "true"
-      # alt names seen in other builds (harmless if unknown):
-      HEALENIUM_SAVE_HEALING_RESULTS: "true"
-      HEALENIUM_SAVE_REPORT: "true"
-
-      # (optional) be explicit about hosts the client uses
-      HEALENIUM_BACKEND_URL: http://healenium-backend:7878
-      SELECTOR_IMITATOR_URL: http://selector-imitator:8000
+      # Make actuator reachable on same port
+      SERVER_PORT: 7878
+      MANAGEMENT_SERVER_PORT: 7878
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+    ports:
+      - "7878:7878"
 
   selector-imitator:
     image: healenium/hlm-selector-imitator:1.6
