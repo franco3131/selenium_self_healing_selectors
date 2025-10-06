@@ -93,9 +93,46 @@ jobs:
       - name: Dump healing_result rows (generic)
         if: always()
         run: |
-          # If the table exists, dump all columns for the latest rows
-          docker compose exec -T postgres psql -U healenium -d healenium \
-            -c "SELECT * FROM healing_result ORDER BY 1 DESC LIMIT 15;" || true
+            SELECT
+            hr.id,
+            hr.create_date,
+            hr.score,
+            hr.success_healing,
+            s.locator        AS old_locator,
+            COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
+            FROM healing_result hr
+            LEFT JOIN selector s
+              ON s.uid = hr.locator                      -- some builds use UID
+            LEFT JOIN healing h
+              ON h.id = hr.healing_id
+            ORDER BY hr.create_date DESC
+            LIMIT 20;
+
+      - name: Dump healing_result rows (generic)2
+        if: always()
+        run: |
+            SELECT
+            hr.id, hr.create_date, hr.score, hr.success_healing,
+            s.locator AS old_locator,
+            COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
+            FROM healing_result hr
+            LEFT JOIN selector s ON s.id = hr.locator
+            LEFT JOIN healing h  ON h.id = hr.healing_id
+            ORDER BY hr.create_date DESC
+            LIMIT 20;
+
+      - name: Dump healing_result rows (generic)3
+        if: always()
+        run: |
+            SELECT
+            hr.id, hr.create_date, hr.score, hr.success_healing,
+            s.locator AS old_locator,
+            COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
+            FROM healing_result hr
+            LEFT JOIN selector s          ON (s.uid = hr.locator OR s.id = hr.locator)
+            LEFT JOIN healing_details h   ON h.id = hr.healing_id
+            ORDER BY hr.create_date DESC
+            LIMIT 20;
 
       - name: Upload test reports and Healenium report
         if: always()
