@@ -80,40 +80,82 @@ jobs:
           name: screenshots
           path: target/screenshots/**
           if-no-files-found: warn
+      - name: What healed (old → new, with score)
+        if: always()
+        run: |
+          docker compose exec -T postgres psql -U healenium -d healenium -c "
+            WITH base AS (
+              SELECT
+                hr.id                         AS heal_result_id,
+                hr.create_date,
+                hr.score,
+                hr.success_healing,
+                s.class_name,
+                s.method_name,
+                s.url,
+                s.locator                     AS old_locator,
+                r.elements                    AS elements_raw
+              FROM healing_result hr
+              JOIN healing  h ON h.uid  = hr.healing_id
+              JOIN selector s ON s.uid  = h.selector_id
+              LEFT JOIN report  r ON r.uid = h.uid
+              ORDER BY hr.create_date DESC
+              LIMIT 25
+            ),
+            parsed AS (
+              SELECT
+                b.*,
+                -- try JSON first (if elements is valid JSON)
+                CASE
+                  WHEN b.elements_raw ~ '^[\\{\\[].*[\\}\\]]$'
+                  THEN COALESCE(
+                    NULLIF(TRIM(BOTH '\"' FROM (b.elements_raw::jsonb ->> 'new_locator')), ''),
+                    NULLIF(TRIM(BOTH '\"' FROM (b.elements_raw::jsonb ->> 'healed_locator')), ''),
+                    NULLIF(TRIM(BOTH '\"' FROM (b.elements_raw::jsonb ->> 'locator_to')), ''),
+                    NULLIF(TRIM(BOTH '\"' FROM (b.elements_raw::jsonb ->> 'target_locator')), '')
+                  )
+                  ELSE NULL
+                END AS new_locator_json
+              FROM base b
+            )
+            SELECT
+              heal_result_id,
+              to_char(create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+              score,
+              success_healing,
+              class_name || '#' || method_name               AS where_found,
+              url,
+              old_locator,
+              -- If JSON failed, fall back to regex extraction from raw text
+              COALESCE(
+                new_locator_json,
+                NULLIF(regexp_replace(elements_raw, '.*\"new_locator\"\\s*:\\s*\"([^\"]+)\".*', '\\1'), ''),
+                NULLIF(regexp_replace(elements_raw, '.*\"healed_locator\"\\s*:\\s*\"([^\"]+)\".*', '\\1'), ''),
+                NULLIF(regexp_replace(elements_raw, '.*\"locator_to\"\\s*:\\s*\"([^\"]+)\".*', '\\1'), ''),
+                NULLIF(regexp_replace(elements_raw, '.*\"target_locator\"\\s*:\\s*\"([^\"]+)\".*', '\\1'), '')
+              ) AS new_locator
+            FROM parsed
+            ORDER BY created_at DESC;
+            " || true
 
-      - name: Describe report table
-        if: always()
-        run: |
-          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ report" || true
-      - name: Show Healenium schema summary
-        if: always()
-        run: |
-          docker compose exec -T postgres psql -U healenium -d healenium -c "\dt"
-          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ selector"
-          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing"
-          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing_result"
-          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ report" || true
-      
-      - name: What healed (from/score/success)
+      - name: What healed (summary without new-locator)
         if: always()
         run: |
           docker compose exec -T postgres psql -U healenium -d healenium -c "
             SELECT
               hr.id AS heal_result_id,
-              hr.create_date,
+              to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
               hr.score,
               hr.success_healing,
-              s.class_name,
-              s.method_name,
+              s.class_name || '#' || s.method_name              AS where_found,
               s.url,
               s.locator AS old_locator
             FROM healing_result hr
-            JOIN healing h  ON h.uid = hr.healing_id
+            JOIN healing  h ON h.uid = hr.healing_id
             JOIN selector s ON s.uid = h.selector_id
             ORDER BY hr.create_date DESC
             LIMIT 20;
-          " || true        
-          
+          " || true
       - name: Upload test reports and Healenium report
         if: always()
         uses: actions/upload-artifact@v4
