@@ -32,6 +32,8 @@ public class BaseTest {
     public void startBrowserSession() throws java.io.IOException {
         System.setProperty("hlm.server.url", "http://127.0.0.1:7878");
         System.setProperty("hlm.imitator.url", "http://127.0.0.1:8000");
+        // optional but explicit:
+        System.setProperty("hlm.healing.enabled", "true");
         ChromeOptions options = new ChromeOptions();
         Path tmpProfile = Files.createTempDirectory("gha-chrome-profile-");
         options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath());
