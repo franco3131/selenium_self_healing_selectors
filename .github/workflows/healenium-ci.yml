@@ -90,6 +90,38 @@ jobs:
           path: target/screenshots/**
           if-no-files-found: warn
 
+      - name: Show healed selectors (tolerant SQL)
+        if: always()
+        run: |
+          echo "== healing_result (new-style columns) ==" 
+          docker compose exec -T postgres psql -U healenium -d healenium \
+            -c "SELECT id, old_locator, new_locator, score, create_date
+                FROM healing_result
+                ORDER BY create_date DESC
+                LIMIT 15;" || true
+      
+          echo
+          echo "== healing_result (older column names) ==" 
+          docker compose exec -T postgres psql -U healenium -d healenium \
+            -c "SELECT id, original_locator AS old_locator,
+                       healed_locator   AS new_locator,
+                       accuracy         AS score,
+                       create_date
+                FROM healing_result
+                ORDER BY create_date DESC
+                LIMIT 15;" || true
+      
+          echo
+          echo "== legacy table (very old: healingresult) ==" 
+          docker compose exec -T postgres psql -U healenium -d healenium \
+            -c "SELECT id, original_locator AS old_locator,
+                       healed_locator   AS new_locator,
+                       accuracy         AS score,
+                       create_date
+                FROM healingresult
+                ORDER BY create_date DESC
+                LIMIT 15;" || true
+
       - name: Upload test reports and Healenium report
         if: always()
         uses: actions/upload-artifact@v4
