@@ -90,50 +90,55 @@ jobs:
           path: target/screenshots/**
           if-no-files-found: warn
 
-      - name: Dump healing_result rows (generic)
+      - name: Inspect Healenium schema (tables & columns)
         if: always()
         run: |
-            SELECT
-            hr.id,
-            hr.create_date,
-            hr.score,
-            hr.success_healing,
-            s.locator        AS old_locator,
-            COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
-            FROM healing_result hr
-            LEFT JOIN selector s
-              ON s.uid = hr.locator                      -- some builds use UID
-            LEFT JOIN healing h
-              ON h.id = hr.healing_id
-            ORDER BY hr.create_date DESC
-            LIMIT 20;
-
-      - name: Dump healing_result rows (generic)2
+          docker compose exec -T postgres psql -U healenium -d healenium -c "\dt"
+          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing_result" || true
+          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ selector"       || true
+          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing"        || true
+          docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing_details"|| true
+    
+      - name: Show what healed (try common joins)
         if: always()
         run: |
-            SELECT
-            hr.id, hr.create_date, hr.score, hr.success_healing,
-            s.locator AS old_locator,
-            COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
-            FROM healing_result hr
-            LEFT JOIN selector s ON s.id = hr.locator
-            LEFT JOIN healing h  ON h.id = hr.healing_id
-            ORDER BY hr.create_date DESC
-            LIMIT 20;
-
-      - name: Dump healing_result rows (generic)3
+            echo "=== Attempt 1 (selector.uid + healing) ==="
+            docker compose exec -T postgres psql -U healenium -d healenium -c "
+              SELECT hr.id, hr.create_date, hr.score, hr.success_healing,
+                     s.locator AS old_locator,
+                     COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
+              FROM healing_result hr
+              LEFT JOIN selector s ON s.uid = hr.locator
+              LEFT JOIN healing  h ON h.id  = hr.healing_id
+              ORDER BY hr.create_date DESC
+              LIMIT 20;" || true
+      - name: Show what healed (try common joins)2
+        if: always()
+        run: |   
+            echo "=== Attempt 2 (selector.id + healing) ==="
+            docker compose exec -T postgres psql -U healenium -d healenium -c "
+              SELECT hr.id, hr.create_date, hr.score, hr.success_healing,
+                       s.locator AS old_locator,
+                       COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
+                FROM healing_result hr
+                LEFT JOIN selector s ON s.id = hr.locator
+                LEFT JOIN healing  h ON h.id  = hr.healing_id
+                ORDER BY hr.create_date DESC
+                LIMIT 20;" || true
+      - name: Show what healed (try common joins)3
         if: always()
         run: |
-            SELECT
-            hr.id, hr.create_date, hr.score, hr.success_healing,
-            s.locator AS old_locator,
-            COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
-            FROM healing_result hr
-            LEFT JOIN selector s          ON (s.uid = hr.locator OR s.id = hr.locator)
-            LEFT JOIN healing_details h   ON h.id = hr.healing_id
-            ORDER BY hr.create_date DESC
-            LIMIT 20;
-
+              echo "=== Attempt 3 (healing_details fallback) ==="
+              docker compose exec -T postgres psql -U healenium -d healenium -c "
+                SELECT hr.id, hr.create_date, hr.score, hr.success_healing,
+                       s.locator AS old_locator,
+                       COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
+                FROM healing_result hr
+                LEFT JOIN selector s          ON (s.uid = hr.locator OR s.id = hr.locator)
+                LEFT JOIN healing_details h   ON h.id  = hr.healing_id
+                ORDER BY hr.create_date DESC
+                LIMIT 20;" || true
+              
       - name: Upload test reports and Healenium report
         if: always()
         uses: actions/upload-artifact@v4
