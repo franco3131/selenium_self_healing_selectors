@@ -43,8 +43,10 @@
 <dependency>
   <groupId>com.epam.healenium</groupId>
   <artifactId>healenium-web</artifactId>
-  <version>3.4.9</version>
+  <version>3.4.7</version>
+  <scope>test</scope>
 </dependency>
+           
   <dependency>
   <groupId>org.slf4j</groupId>
   <artifactId>slf4j-simple</artifactId>
