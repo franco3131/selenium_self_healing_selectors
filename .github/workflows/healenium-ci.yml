@@ -102,7 +102,8 @@ jobs:
             ORDER BY hr.create_date DESC
             LIMIT 20;
           " || true
-    
+      - name: Count baseline selectors
+        run: docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) FROM selector;"
 
       - name: Upload test reports and Healenium report
         if: always()
