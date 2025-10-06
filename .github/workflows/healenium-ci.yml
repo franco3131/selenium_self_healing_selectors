@@ -103,45 +103,47 @@ jobs:
           docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing"        || true
           docker compose exec -T postgres psql -U healenium -d healenium -c "\d+ healing_details"|| true
     
-      - name: Show what healed (try common joins)
+      - name: Show what healed (auto-detect join via DO block)
         if: always()
         run: |
-            echo "=== Attempt 1 (selector.uid + healing) ==="
-            docker compose exec -T postgres psql -U healenium -d healenium -c "
+          docker compose exec -T postgres psql -U healenium -d healenium -v ON_ERROR_STOP=0 -c "
+          DO $$
+          DECLARE
+            sel_key text := CASE
+              WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='selector' AND column_name='uid') THEN 'uid'
+              ELSE 'id'
+            END;
+            heal_tbl text := CASE
+              WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='healing') THEN 'healing'
+              WHEN EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name='healing_details') THEN 'healing_details'
+              ELSE NULL
+            END;
+            heal_key text := CASE
+              WHEN heal_tbl IS NULL THEN NULL
+              WHEN EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name=heal_tbl AND column_name='uid') THEN 'uid'
+              ELSE 'id'
+            END;
+            sql text;
+          BEGIN
+            IF heal_tbl IS NULL THEN
+              RAISE NOTICE 'no healing table found';
+              RETURN;
+            END IF;
+      
+            sql := format($q$
               SELECT hr.id, hr.create_date, hr.score, hr.success_healing,
                      s.locator AS old_locator,
                      COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
               FROM healing_result hr
-              LEFT JOIN selector s ON s.uid = hr.locator
-              LEFT JOIN healing  h ON h.id  = hr.healing_id
+              LEFT JOIN selector s ON s.%I = hr.locator
+              LEFT JOIN %I h       ON h.%I = hr.healing_id
               ORDER BY hr.create_date DESC
-              LIMIT 20;" || true
-      - name: Show what healed (try common joins)2
-        if: always()
-        run: |   
-            echo "=== Attempt 2 (selector.id + healing) ==="
-            docker compose exec -T postgres psql -U healenium -d healenium -c "
-              SELECT hr.id, hr.create_date, hr.score, hr.success_healing,
-                       s.locator AS old_locator,
-                       COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
-                FROM healing_result hr
-                LEFT JOIN selector s ON s.id = hr.locator
-                LEFT JOIN healing  h ON h.id  = hr.healing_id
-                ORDER BY hr.create_date DESC
-                LIMIT 20;" || true
-      - name: Show what healed (try common joins)3
-        if: always()
-        run: |
-              echo "=== Attempt 3 (healing_details fallback) ==="
-              docker compose exec -T postgres psql -U healenium -d healenium -c "
-                SELECT hr.id, hr.create_date, hr.score, hr.success_healing,
-                       s.locator AS old_locator,
-                       COALESCE(h.new_locator, h.healed_locator, h.locator_to, h.target_locator) AS new_locator
-                FROM healing_result hr
-                LEFT JOIN selector s          ON (s.uid = hr.locator OR s.id = hr.locator)
-                LEFT JOIN healing_details h   ON h.id  = hr.healing_id
-                ORDER BY hr.create_date DESC
-                LIMIT 20;" || true
+              LIMIT 20;
+            $q$, sel_key, heal_tbl, heal_key);
+      
+            EXECUTE sql;
+          END $$;
+          "
               
       - name: Upload test reports and Healenium report
         if: always()
