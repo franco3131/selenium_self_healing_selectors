@@ -19,7 +19,7 @@ services:
       retries: 20
 
   healenium-backend:
-    image: healenium/healenium-backend:latest
+    image: healenium/hlm-backend:3.4.9
     environment:
       # DB profile & connection
       SPRING_PROFILES_ACTIVE: postgres
