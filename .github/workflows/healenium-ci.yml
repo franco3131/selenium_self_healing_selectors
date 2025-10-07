@@ -41,6 +41,14 @@ jobs:
         run: |
           mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@baseline" test
 
+      - name: Count baseline selectors
+        if: always()
+        run: |
+          echo "Checking selector table..."
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT COUNT(*) AS selector_rows FROM selector;" || true
+
       - name: Run healing scenario (with Healenium logs)
         env:
           SELENIUM_HEADLESS: "true"
@@ -51,13 +59,22 @@ jobs:
             -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
             -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
 
+
       - name: Collect docker logs
         if: always()
         run: |
           mkdir -p artifacts/docker-logs
           docker compose logs > artifacts/docker-logs/compose.log || true
           docker compose ps   > artifacts/docker-logs/ps.txt || true
-
+  
+      - name: Count healing selectors
+        if: always()
+        run: |
+          echo "Checking healing_result table..."
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT COUNT(*) AS heal_rows FROM healing_result;" || true
+          
       - name: Show Healenium selectors (psql)
         if: always()
         run: |
