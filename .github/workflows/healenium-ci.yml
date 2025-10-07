@@ -42,7 +42,8 @@ jobs:
 
       - name: Count baseline selectors
         if: always()
-        run: docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) AS selector_rows FROM selector;" || true
+        run: |
+          docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) AS selector_rows FROM selector;" || true
 
       - name: Run healing scenario (with Healenium logs)
         env: { SELENIUM_HEADLESS: "true" }
@@ -56,7 +57,8 @@ jobs:
 
       - name: Count healed results
         if: always()
-        run:  docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) AS heal_rows FROM healing_result;" || true
+        run: |
+          docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) AS heal_rows FROM healing_result;" || true
 
       - name: Collect docker logs
         if: always()
