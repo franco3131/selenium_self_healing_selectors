@@ -40,13 +40,11 @@
     <scope>test</scope>
   </dependency>
       <!-- Healenium Web (self-healing wrapper for Selenium) -->
-<dependency>
-  <groupId>com.epam.healenium</groupId>
-  <artifactId>healenium-web</artifactId>
-  <version>3.4.7</version>
-  <scope>test</scope>
-</dependency>
-           
+  <dependency>
+    <groupId>com.epam.healenium</groupId>
+    <artifactId>healenium-web</artifactId>
+    <version>${healenium.version}</version>
+  </dependency>
   <dependency>
   <groupId>org.slf4j</groupId>
   <artifactId>slf4j-simple</artifactId>
@@ -58,13 +56,7 @@
           <artifactId>surefire-testng</artifactId>
           <version>3.2.5</version>
         </dependency>
-<dependency>
-  <groupId>ch.qos.logback</groupId>
-  <artifactId>logback-classic</artifactId>
-  <version>1.4.14</version>
-  <scope>test</scope>
-</dependency>
-           
+
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
@@ -80,7 +72,6 @@
   </dependencies>
 
   <build>
-           <plugins> 
 <plugin>
   <groupId>org.apache.maven.plugins</groupId>
   <artifactId>maven-surefire-plugin</artifactId>
@@ -105,8 +96,6 @@
         <value>testng</value>
       </property>
     </properties>
-<parallel>none</parallel>
-  <useModulePath>false</useModulePath>
   </configuration>
 </plugin>
     </plugins>
