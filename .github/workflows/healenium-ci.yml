@@ -61,13 +61,13 @@ jobs:
       - name: Show Healenium selectors (psql)
         if: always()
         run: |
-          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium <<SQL
-          SELECT uid, class_name, method_name, locator, url, create_date
-          FROM selector
-          ORDER BY create_date DESC
-          LIMIT 15;
-          SQL'
-
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT uid, class_name, method_name, locator, url, create_date
+                FROM selector
+                ORDER BY create_date DESC
+                LIMIT 15;"
+                
       - name: List screenshots (debug)
         if: always()
         run: |
@@ -86,21 +86,21 @@ jobs:
       - name: What healed (summary)
         if: always()
         run: |
-          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium <<SQL
-          SELECT
-            hr.id AS heal_result_id,
-            to_char(hr.create_date, '\''YYYY-MM-DD HH24:MI:SS'\'') AS created_at,
-            hr.score,
-            hr.success_healing,
-            s.class_name || '\''#'\'' || s.method_name AS where_found,
-            s.url,
-            s.locator AS old_locator
-          FROM healing_result hr
-          JOIN healing  h ON h.uid = hr.healing_id
-          JOIN selector s ON s.uid = h.selector_id
-          ORDER BY hr.create_date DESC
-          LIMIT 20;
-          SQL'
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT
+                  hr.id AS heal_result_id,
+                  to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+                  hr.score,
+                  hr.success_healing,
+                  s.class_name || '#' || s.method_name AS where_found,
+                  s.url,
+                  s.locator AS old_locator
+                FROM healing_result hr
+                JOIN healing  h ON h.uid = hr.healing_id
+                JOIN selector s ON s.uid = h.selector_id
+                ORDER BY hr.create_date DESC
+                LIMIT 20;"
 
       - name: Count baseline selectors
         if: always()
