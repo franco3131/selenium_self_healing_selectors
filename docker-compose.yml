@@ -6,8 +6,13 @@ services:
     # platform: linux/amd64   # ← uncomment on Apple Silicon if you hit arch issues
     environment:
       POSTGRES_DB: healenium
+      SPRING_POSTGRES_SCHEMA: public
       POSTGRES_USER: healenium
       POSTGRES_PASSWORD: healenium
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+      SAVE_HEALING_RESULTS: "true"
+      SAVE_HEALING_REPORT: "true"
     ports:
       - "5432:5432"
     volumes:
