@@ -59,13 +59,20 @@ jobs:
             -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
             -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
 
-
-      - name: Collect docker logs
+      - name: Collect & print backend healing logs
         if: always()
         run: |
           mkdir -p artifacts/docker-logs
-          docker compose logs > artifacts/docker-logs/compose.log || true
-          docker compose ps   > artifacts/docker-logs/ps.txt || true
+          docker compose logs healenium-backend > artifacts/docker-logs/backend.log || true
+          echo "=== Backend: last 300 lines with healing keywords ==="
+          tail -n 300 artifacts/docker-logs/backend.log | grep -Ei "heal|healed|healing_result|selector" || true
+          echo "=== Full backend log saved to artifacts/docker-logs/backend.log ==="
+            - name: Collect docker logs
+              if: always()
+              run: |
+                mkdir -p artifacts/docker-logs
+                docker compose logs > artifacts/docker-logs/compose.log || true
+                docker compose ps   > artifacts/docker-logs/ps.txt || true
   
       - name: Count healing selectors
         if: always()
