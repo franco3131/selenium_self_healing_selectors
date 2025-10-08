@@ -10,16 +10,19 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
           cache: maven
+
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
+
       - name: Start Healenium via docker-compose
         run: |
           docker compose up -d
@@ -31,18 +34,13 @@ jobs:
             sleep 5
           done
           docker ps
+
       - name: Run baseline (seed selectors)
         env:
           SELENIUM_HEADLESS: "true"
         run: |
           mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@baseline" test
-      - name: Count baseline selectors
-        if: always()
-        run: |
-          echo "Checking selector table..."
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT COUNT(*) AS selector_rows FROM selector;" || true
+
       - name: Run healing scenario (with Healenium logs)
         env:
           SELENIUM_HEADLESS: "true"
@@ -52,38 +50,24 @@ jobs:
             -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS \
             -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
             -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
-      - name: Collect & print backend healing logs
+
+      - name: Collect docker logs
         if: always()
         run: |
           mkdir -p artifacts/docker-logs
-          docker compose logs healenium-backend > artifacts/docker-logs/backend.log || true
-          echo "=== Backend: last 300 lines with healing keywords ==="
-          tail -n 300 artifacts/docker-logs/backend.log | grep -Ei "heal|healed|healing_result|selector" || true
-          echo "=== Full backend log saved to artifacts/docker-logs/backend.log ==="
-            - name: Collect docker logs
-              if: always()
-              run: |
-                mkdir -p artifacts/docker-logs
-                docker compose logs > artifacts/docker-logs/compose.log || true
-                docker compose ps   > artifacts/docker-logs/ps.txt || true
-      - name: Count healing selectors
-        if: always()
-        run: |
-          echo "Checking healing_result table..."
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT COUNT(*) AS heal_rows FROM healing_result;" || true
-          
+          docker compose logs > artifacts/docker-logs/compose.log || true
+          docker compose ps   > artifacts/docker-logs/ps.txt || true
+
       - name: Show Healenium selectors (psql)
         if: always()
         run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT uid, class_name, method_name, locator, url, create_date
-                FROM selector
-                ORDER BY create_date DESC
-                LIMIT 15;"
-                
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium <<SQL
+          SELECT uid, class_name, method_name, locator, url, create_date
+          FROM selector
+          ORDER BY create_date DESC
+          LIMIT 15;
+          SQL'
+
       - name: List screenshots (debug)
         if: always()
         run: |
@@ -102,21 +86,21 @@ jobs:
       - name: What healed (summary)
         if: always()
         run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT
-                  hr.id AS heal_result_id,
-                  to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-                  hr.score,
-                  hr.success_healing,
-                  s.class_name || '#' || s.method_name AS where_found,
-                  s.url,
-                  s.locator AS old_locator
-                FROM healing_result hr
-                JOIN healing  h ON h.uid = hr.healing_id
-                JOIN selector s ON s.uid = h.selector_id
-                ORDER BY hr.create_date DESC
-                LIMIT 20;"
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium <<SQL
+          SELECT
+            hr.id AS heal_result_id,
+            to_char(hr.create_date, '\''YYYY-MM-DD HH24:MI:SS'\'') AS created_at,
+            hr.score,
+            hr.success_healing,
+            s.class_name || '\''#'\'' || s.method_name AS where_found,
+            s.url,
+            s.locator AS old_locator
+          FROM healing_result hr
+          JOIN healing  h ON h.uid = hr.healing_id
+          JOIN selector s ON s.uid = h.selector_id
+          ORDER BY hr.create_date DESC
+          LIMIT 20;
+          SQL'
 
       - name: Count baseline selectors
         if: always()
