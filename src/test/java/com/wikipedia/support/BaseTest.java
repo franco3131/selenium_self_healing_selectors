@@ -34,6 +34,7 @@ public class BaseTest {
         System.setProperty("hlm.imitator.url", "http://127.0.0.1:8000");
         // optional but explicit:
         System.setProperty("hlm.healing.enabled", "true");
+        System.setProperty("hlm.sessionkey",System.getenv().getOrDefault("GITHUB_RUN_ID","local-run");
         ChromeOptions options = new ChromeOptions();
         Path tmpProfile = Files.createTempDirectory("gha-chrome-profile-");
         options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath());
