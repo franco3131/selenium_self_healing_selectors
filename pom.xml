@@ -16,7 +16,7 @@
 <selenium.version>4.25.0</selenium.version>
 <cucumber.version>7.14.0</cucumber.version>
 <junit.version>4.13.2</junit.version>
-  <healenium.version>3.4.0</healenium.version>
+  <healenium.version>3.4.7</healenium.version>
 
   </properties>
 
