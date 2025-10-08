@@ -19,7 +19,7 @@ services:
       retries: 20
 
   healenium-backend:
-    image: healenium/hlm-backend:3.5.7
+    image: healenium/hlm-backend:3.4.9
     # platform: linux/amd64   # ← uncomment on Apple Silicon if needed
     depends_on:
       postgres:
