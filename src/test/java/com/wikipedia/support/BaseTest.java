@@ -30,6 +30,7 @@ public class BaseTest {
 
     @Before(order = 0)
     public void startBrowserSession() throws java.io.IOException {
+        System.setProperty("webdriver.http.factory", "jdk-http-client");
         System.setProperty("hlm.server.url", "http://127.0.0.1:7878");
         System.setProperty("hlm.imitator.url", "http://127.0.0.1:8000");
         // optional but explicit:
