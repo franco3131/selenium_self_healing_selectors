@@ -2,7 +2,6 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.example</groupId>
   <artifactId>healenium-selenium-testng</artifactId>
   <version>1.0.0</version>
@@ -12,11 +11,9 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
     <selenium.version>4.24.0</selenium.version>
     <testng.version>7.10.2</testng.version>
-    <healenium.version>3.5.0</healenium.version>
-
+    <healenium.version>3.5.7</healenium.version>
     <maven.surefire.version>3.2.5</maven.surefire.version>
     <maven.enforcer.version>3.4.1</maven.enforcer.version>
     <webdrivermanager.version>5.9.2</webdrivermanager.version>
@@ -35,18 +32,20 @@
   </dependencyManagement>
 
   <dependencies>
+    <!-- Selenium core -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
     </dependency>
 
-    <!-- ✅ Add explicit version -->
+    <!-- Use selenium-http (4.24.0 exists); do NOT use selenium-http-jdk-client at 4.24 -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
-      <artifactId>selenium-http-jdk-client</artifactId>
+      <artifactId>selenium-http</artifactId>
       <version>${selenium.version}</version>
     </dependency>
 
+    <!-- TestNG -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -54,12 +53,14 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Optional: WebDriverManager -->
     <dependency>
       <groupId>io.github.bonigarcia</groupId>
       <artifactId>webdrivermanager</artifactId>
       <version>${webdrivermanager.version}</version>
     </dependency>
 
+    <!-- Healenium (exclude Selenium & legacy HTTP clients) -->
     <dependency>
       <groupId>com.epam.healenium</groupId>
       <artifactId>healenium-web</artifactId>
@@ -87,34 +88,7 @@
         </exclusion>
       </exclusions>
     </dependency>
-
-    <dependency>
-      <groupId>com.epam.healenium</groupId>
-      <artifactId>healenium-client</artifactId>
-      <version>${healenium.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-java</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-remote-driver</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.squareup.okhttp3</groupId>
-          <artifactId>okhttp</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+    <!-- NOTE: healenium-client is not on Central; omit it -->
   </dependencies>
 
   <build>
@@ -130,9 +104,7 @@
             <configuration>
               <rules>
                 <DependencyConvergence/>
-                <RequireJavaVersion>
-                  <version>[11,)</version>
-                </RequireJavaVersion>
+                <RequireJavaVersion><version>[11,)</version></RequireJavaVersion>
               </rules>
               <fail>true</fail>
             </configuration>
@@ -151,27 +123,10 @@
             <include>**/*IT.java</include>
           </includes>
           <properties>
-            <property>
-              <name>usedefaultlisteners</name>
-              <value>false</value>
-            </property>
+            <property><name>usedefaultlisteners</name><value>false</value></property>
           </properties>
         </configuration>
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>apache-http-client5</id>
-      <dependencies>
-        <!-- ✅ Add explicit version here too -->
-        <dependency>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-http-apache-client5</artifactId>
-          <version>${selenium.version}</version>
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
 </project>
