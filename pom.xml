@@ -1,30 +1,40 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.selenium</groupId>
-  <artifactId>selenium-self-healing</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <groupId>com.example</groupId>
+  <artifactId>healenium-selenium-testng</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
 
   <properties>
-    <maven.compiler.source>21</maven.compiler.source>
-    <maven.compiler.target>21</maven.compiler.target>
+    <!-- Java toolchain -->
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- centralize test libs -->
-    <cucumber.version>7.14.0</cucumber.version>
+    <!-- Centralized versions -->
+    <selenium.version>4.24.0</selenium.version>
     <testng.version>7.10.2</testng.version>
-    <slf4j.simple.version>2.0.13</slf4j.simple.version>
+    <!-- Pick a Healenium release that supports Selenium 4.
+         If you’re unsure, start around 3.5.x and adjust as needed. -->
+    <healenium.version>3.5.0</healenium.version>
+
+    <!-- Plugin versions -->
+    <maven.surefire.version>3.2.5</maven.surefire.version>
+    <maven.enforcer.version>3.4.1</maven.enforcer.version>
+    <webdrivermanager.version>5.9.2</webdrivermanager.version>
   </properties>
 
-  <!-- Keep Selenium versions consistent -->
+  <!-- Force all selenium-* to the same version -->
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.seleniumhq.selenium</groupId>
         <artifactId>selenium-bom</artifactId>
-        <version>4.21.0</version>
+        <version>${selenium.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -32,47 +42,19 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- Selenium (version comes from BOM) -->
+    <!-- Selenium core (pulls modules via BOM) -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
     </dependency>
 
-    <!-- Healenium client that matches backend 3.4.9 -->
+    <!-- Exactly ONE HTTP client; JDK client is simplest (Java 11+) -->
     <dependency>
-      <groupId>com.epam.healenium</groupId>
-      <artifactId>healenium-web</artifactId>
-      <version>3.4.7</version>
-      <!-- guard against old Selenium getting pulled in -->
-      <exclusions>
-        <exclusion>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-remote-driver</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.seleniumhq.selenium</groupId>
-          <artifactId>selenium-chrome-driver</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-http-jdk-client</artifactId>
     </dependency>
 
-    <!-- Cucumber + TestNG runner -->
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-java</artifactId>
-      <version>${cucumber.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-testng</artifactId>
-      <version>${cucumber.version}</version>
-      <scope>test</scope>
-    </dependency>
+    <!-- TestNG -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -80,48 +62,150 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Simple console logs so Healenium messages appear in CI -->
+    <!-- Optional: WebDriverManager for driver binaries -->
     <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j.simple.version}</version>
-      <scope>runtime</scope>
+      <groupId>io.github.bonigarcia</groupId>
+      <artifactId>webdrivermanager</artifactId>
+      <version>${webdrivermanager.version}</version>
     </dependency>
+
+    <!-- Healenium (exclude Selenium & legacy HTTP clients to prevent clashes) -->
+    <dependency>
+      <groupId>com.epam.healenium</groupId>
+      <artifactId>healenium-web</artifactId>
+      <version>${healenium.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-remote-driver</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.squareup.okhttp3</groupId>
+          <artifactId>okhttp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Add other Healenium modules you use, with the same exclusions -->
+    <dependency>
+      <groupId>com.epam.healenium</groupId>
+      <artifactId>healenium-client</artifactId>
+      <version>${healenium.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-remote-driver</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.squareup.okhttp3</groupId>
+          <artifactId>okhttp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+      </exclusions>
+      <!-- If you don't use healenium-client directly, you can remove this -->
+    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
+      <!-- Enforce no duplicate/conflicting deps -->
       <plugin>
-
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
-         <dependencies>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>${maven.enforcer.version}</version>
+                        <dependencies>
              <dependency>
                <groupId>org.apache.maven.surefire</groupId>
                <artifactId>surefire-testng</artifactId>
                <version>3.2.5</version>
              </dependency>
            </dependencies>
+        <executions>
+          <execution>
+            <id>enforce</id>
+            <goals><goal>enforce</goal></goals>
+            <configuration>
+              <rules>
+                <DependencyConvergence/>
+                <RequireJavaVersion>
+                  <version>[11,)</version>
+                </RequireJavaVersion>
+              </rules>
+              <fail>true</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- Surefire set for TestNG -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.version}</version>
         <configuration>
-          <!-- You’re using TestNG -->
+          <!-- Auto-detect TestNG; you can also point to a suite file -->
+          <!-- <suiteXmlFiles>
+            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
+          </suiteXmlFiles> -->
+          <includes>
+            <include>**/*Test.java</include>
+            <include>**/*Tests.java</include>
+            <include>**/*IT.java</include>
+          </includes>
           <properties>
             <property>
-              <name>listener</name>
-              <value></value>
+              <name>usedefaultlisteners</name>
+              <value>false</value>
             </property>
           </properties>
-          <!-- helpful when debugging classpath issues -->
-          <systemPropertyVariables>
-            <org.slf4j.simpleLogger.showDateTime>true</org.slf4j.simpleLogger.showDateTime>
-            <org.slf4j.simpleLogger.dateTimeFormat>HH:mm:ss.SSS</org.slf4j.simpleLogger.dateTimeFormat>
-            <org.slf4j.simpleLogger.defaultLogLevel>info</org.slf4j.simpleLogger.defaultLogLevel>
-            <org.slf4j.simpleLogger.log.com.epam.healenium>debug</org.slf4j.simpleLogger.log.com.epam.healenium>
-            <!-- Strongly recommended to avoid Apache HttpClient NoClassDefFound -->
-            <webdriver.http.factory>jdk-http-client</webdriver.http.factory>
-          </systemPropertyVariables>
         </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <!-- Optional profile: swap to Apache HttpClient5 transport instead of JDK client
+       Activate with: -Papache-http-client5 -->
+  <profiles>
+    <profile>
+      <id>apache-http-client5</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-http-apache-client5</artifactId>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
 </project>
+
+
+
+
+
