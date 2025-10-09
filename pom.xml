@@ -103,10 +103,6 @@
               <value></value>
             </property>
           </properties>
-          <includes>
-            <!-- your TestNG+Cucumber runner(s) -->
-            <include>**/*RunnerTest*.java</include>
-          </includes>
           <!-- helpful when debugging classpath issues -->
           <systemPropertyVariables>
             <org.slf4j.simpleLogger.showDateTime>true</org.slf4j.simpleLogger.showDateTime>
