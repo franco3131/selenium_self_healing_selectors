@@ -30,12 +30,12 @@ public class BaseTest {
 
     @Before(order = 0)
     public void startBrowserSession() throws java.io.IOException {
-        System.setProperty("webdriver.http.factory", "jdk-http-client");
-        System.setProperty("hlm.server.url", "http://127.0.0.1:7878");
-        System.setProperty("hlm.imitator.url", "http://127.0.0.1:8000");
-        // optional but explicit:
-        System.setProperty("hlm.healing.enabled", "true");
-        System.setProperty("hlm.sessionkey",System.getenv().getOrDefault("GITHUB_RUN_ID","local-run"));
+        // System.setProperty("webdriver.http.factory", "jdk-http-client");
+        // System.setProperty("hlm.server.url", "http://127.0.0.1:7878");
+        // System.setProperty("hlm.imitator.url", "http://127.0.0.1:8000");
+        // // optional but explicit:
+        // System.setProperty("hlm.healing.enabled", "true");
+        // System.setProperty("hlm.sessionkey",System.getenv().getOrDefault("GITHUB_RUN_ID","local-run"));
         ChromeOptions options = new ChromeOptions();
         Path tmpProfile = Files.createTempDirectory("gha-chrome-profile-");
         options.addArguments("--user-data-dir=" + tmpProfile.toAbsolutePath());
