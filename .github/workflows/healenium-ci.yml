@@ -42,14 +42,11 @@ jobs:
         run: |
           mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@baseline" test
 
-      - name: Run healing scenario (with Healenium logs)
-        env: { SELENIUM_HEADLESS: "true" }
-        run: >
-          mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@healing" test
-          -Dorg.slf4j.simpleLogger.showDateTime=true
-          -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS
-          -Dorg.slf4j.simpleLogger.defaultLogLevel=info
-          -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
+      - name: Run healing scenario (mutate DOM; expect heal)
+        env:
+          SELENIUM_HEADLESS: "true"
+        run: |
+          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@healing" test
 
       - name: Collect docker logs
         if: always()
@@ -65,6 +62,15 @@ jobs:
             psql -U healenium -d healenium \
             -c "SELECT uid, class_name, method_name, locator, url, create_date
                 FROM selector ORDER BY create_date DESC LIMIT 15;"
+
+      - name: Dump Healenium healed selectors (psql)
+        if: always()
+        run: |
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT uid, old_locator, new_locator, score, create_date
+                FROM healing_result ORDER BY create_date DESC LIMIT 15;" \
+            > artifacts/docker-logs/healing-result.txt || true
 
 
       - name: List screenshots (debug)
@@ -82,28 +88,12 @@ jobs:
           path: target/screenshots/**
           if-no-files-found: warn
 
-
-
-      - name: What healed (summary)
+      - name: Dump healing_result rows (generic)
         if: always()
         run: |
-          docker compose exec -T postgres psql -U healenium -d healenium -c "
-            SELECT
-              hr.id AS heal_result_id,
-              to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-              hr.score,
-              hr.success_healing,
-              s.class_name || '#' || s.method_name AS where_found,
-              s.url,
-              s.locator AS old_locator
-            FROM healing_result hr
-            JOIN healing  h ON h.uid = hr.healing_id
-            JOIN selector s ON s.uid = h.selector_id
-            ORDER BY hr.create_date DESC
-            LIMIT 20;
-          " || true
-      - name: Count baseline selectors
-        run: docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) FROM selector;"
+          # If the table exists, dump all columns for the latest rows
+          docker compose exec -T postgres psql -U healenium -d healenium \
+            -c "SELECT * FROM healing_result ORDER BY 1 DESC LIMIT 15;" || true
 
       - name: Upload test reports and Healenium report
         if: always()
