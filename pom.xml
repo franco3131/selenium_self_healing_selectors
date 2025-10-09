@@ -21,12 +21,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>io.cucumber</groupId>
-      <artifactId>cucumber-java</artifactId>
-      <version>${cucumber.version}</version>
-      <scope>test</scope>
-    </dependency>
       <!-- Healenium Web (self-healing wrapper for Selenium) -->
   <dependency>
     <groupId>com.epam.healenium</groupId>
@@ -58,7 +52,39 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+<dependency>
+<groupId>io.cucumber</groupId>
+<artifactId>cucumber-java</artifactId>
+<version>${cucumber.version}</version>
+<scope>test</scope>
+</dependency>
 
+
+<!-- Cucumber integration with TestNG -->
+<dependency>
+<groupId>io.cucumber</groupId>
+<artifactId>cucumber-testng</artifactId>
+<version>${cucumber.version}</version>
+<scope>test</scope>
+</dependency>
+
+
+<!-- TestNG -->
+<dependency>
+<groupId>org.testng</groupId>
+<artifactId>testng</artifactId>
+<version>${testng.version}</version>
+<scope>test</scope>
+</dependency>
+
+
+<!-- Optional: PicoContainer for Dependency Injection in Cucumber -->
+<dependency>
+<groupId>io.cucumber</groupId>
+<artifactId>cucumber-picocontainer</artifactId>
+<version>${cucumber.version}</version>
+<scope>test</scope>
+</dependency>
   <build>
     <plugins>
       <plugin>
