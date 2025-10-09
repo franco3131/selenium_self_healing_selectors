@@ -1,5 +1,8 @@
 name: Healenium demo
+
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
@@ -22,7 +25,6 @@ jobs:
         with:
           chrome-version: stable
 
-      # Start services and wait
       - name: Start Healenium via docker-compose
         run: |
           docker compose up -d
@@ -39,55 +41,54 @@ jobs:
         env:
           SELENIUM_HEADLESS: "true"
         run: |
-          mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@baseline" test
+          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@baseline" test
 
-      - name: Run healing scenario (with Healenium logs)
+      - name: Run healing scenario (mutate DOM; expect heal)
         env:
           SELENIUM_HEADLESS: "true"
         run: |
-          mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@healing" test \
-            -Dorg.slf4j.simpleLogger.showDateTime=true \
-            -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS \
-            -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
-            -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
+          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@healing" test
 
-      - name: Count baseline selectors
-        if: always()
-        run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT COUNT(*) AS selector_rows FROM selector;"
-
-      - name: Count healing results
-        if: always()
-        run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT COUNT(*) AS heal_rows FROM healing_result;"
-
-      - name: What healed (summary)
-        if: always()
-        run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT
-                  hr.id AS heal_result_id,
-                  to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-                  hr.score, hr.success_healing,
-                  s.class_name || '#' || s.method_name AS where_found,
-                  s.url, s.locator AS old_locator
-                FROM healing_result hr
-                JOIN healing  h ON h.uid = hr.healing_id
-                JOIN selector s ON s.uid = h.selector_id
-                ORDER BY hr.create_date DESC
-                LIMIT 20;"
-
-      - name: Collect docker logs
+      - name: Collect docker logs (+ backend last 300 lines)
         if: always()
         run: |
           mkdir -p artifacts/docker-logs
           docker compose logs > artifacts/docker-logs/compose.log || true
           docker compose ps   > artifacts/docker-logs/ps.txt || true
+          echo "=== Backend: last 300 lines with healing keywords ==="
+          docker compose logs --tail=300 healenium-backend | tee artifacts/docker-logs/backend.log | egrep -i "Save Elements|Healing|selector|WARN|ERROR" || true
+          echo "=== Full backend log saved to artifacts/docker-logs/backend.log ==="
+
+      - name: DB snapshot – counts
+        if: always()
+        run: |
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium -c "SELECT COUNT(*) AS selector_rows FROM selector;"'
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium -c "SELECT COUNT(*) AS healing_rows FROM healing;"'
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium -c "SELECT COUNT(*) AS healing_result_rows FROM healing_result;"'
+
+      - name: Show last selectors
+        if: always()
+        run: |
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium -c "SELECT uid, class_name, method_name, LEFT(locator,120) AS locator, LEFT(url,120) AS url, create_date FROM selector ORDER BY create_date DESC LIMIT 15;"'
+
+      - name: What healed (summary join)
+        if: always()
+        run: |
+          docker compose exec -T postgres bash -lc 'psql -U healenium -d healenium -c "
+            SELECT
+              hr.id AS heal_result_id,
+              to_char(hr.create_date, '\''YYYY-MM-DD HH24:MI:SS'\'') AS created_at,
+              hr.score,
+              hr.success_healing,
+              s.class_name || '\''#'\'' || s.method_name AS where_found,
+              s.url,
+              s.locator AS old_locator
+            FROM healing_result hr
+            JOIN healing  h ON h.uid = hr.healing_id
+            JOIN selector s ON s.uid = h.selector_id
+            ORDER BY hr.create_date DESC
+            LIMIT 20;
+          "'
 
       - name: List screenshots (debug)
         if: always()
