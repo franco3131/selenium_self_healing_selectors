@@ -41,13 +41,13 @@ jobs:
         env:
           SELENIUM_HEADLESS: "true"
         run: |
-          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@baseline" test
+          mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@baseline" test
 
       - name: Run healing scenario (mutate DOM; expect heal)
         env:
           SELENIUM_HEADLESS: "true"
         run: |
-          mvn -B -Dtest=*RunnerTest* -Dcucumber.filter.tags="@healing" test
+          mvn -B -Dtest="*RunnerTest*" -Dcucumber.filter.tags="@healing" test
 
       - name: Collect docker logs (+ backend last 300 lines)
         if: always()
