@@ -1,4 +1,5 @@
 name: Healenium demo
+
 on:
   workflow_dispatch:
 
@@ -22,7 +23,6 @@ jobs:
         with:
           chrome-version: stable
 
-      # Start services and wait
       - name: Start Healenium via docker-compose
         run: |
           docker compose up -d
@@ -51,37 +51,6 @@ jobs:
             -Dorg.slf4j.simpleLogger.defaultLogLevel=info \
             -Dorg.slf4j.simpleLogger.log.com.epam.healenium=debug
 
-      - name: Count baseline selectors
-        if: always()
-        run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT COUNT(*) AS selector_rows FROM selector;"
-
-      - name: Count healing results
-        if: always()
-        run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT COUNT(*) AS heal_rows FROM healing_result;"
-
-      - name: What healed (summary)
-        if: always()
-        run: |
-          docker compose exec -T postgres \
-            psql -U healenium -d healenium \
-            -c "SELECT
-                  hr.id AS heal_result_id,
-                  to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
-                  hr.score, hr.success_healing,
-                  s.class_name || '#' || s.method_name AS where_found,
-                  s.url, s.locator AS old_locator
-                FROM healing_result hr
-                JOIN healing  h ON h.uid = hr.healing_id
-                JOIN selector s ON s.uid = h.selector_id
-                ORDER BY hr.create_date DESC
-                LIMIT 20;"
-
       - name: Collect docker logs
         if: always()
         run: |
@@ -89,6 +58,16 @@ jobs:
           docker compose logs > artifacts/docker-logs/compose.log || true
           docker compose ps   > artifacts/docker-logs/ps.txt || true
 
+      - name: Show Healenium selectors (psql)
+        if: always()
+        run: |
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT uid, class_name, method_name, locator, url, create_date
+                FROM selector
+                ORDER BY create_date DESC
+                LIMIT 15;"
+                
       - name: List screenshots (debug)
         if: always()
         run: |
@@ -103,6 +82,32 @@ jobs:
           name: screenshots
           path: target/screenshots/**
           if-no-files-found: warn
+
+      - name: What healed (summary)
+        if: always()
+        run: |
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT
+                  hr.id AS heal_result_id,
+                  to_char(hr.create_date, 'YYYY-MM-DD HH24:MI:SS') AS created_at,
+                  hr.score,
+                  hr.success_healing,
+                  s.class_name || '#' || s.method_name AS where_found,
+                  s.url,
+                  s.locator AS old_locator
+                FROM healing_result hr
+                JOIN healing  h ON h.uid = hr.healing_id
+                JOIN selector s ON s.uid = h.selector_id
+                ORDER BY hr.create_date DESC
+                LIMIT 20;"
+
+      - name: Count baseline selectors
+        if: always()
+        run: |
+          docker compose exec -T postgres \
+            psql -U healenium -d healenium \
+            -c "SELECT COUNT(*) AS selector_rows FROM selector;" || true
 
       - name: Upload test reports and Healenium report
         if: always()
