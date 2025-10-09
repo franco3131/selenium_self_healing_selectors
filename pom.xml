@@ -35,19 +35,18 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- Selenium core (BOM controls versions) -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
     </dependency>
 
-    <!-- Exactly ONE transport by default -->
+    <!-- ✅ Add explicit version -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-http-jdk-client</artifactId>
+      <version>${selenium.version}</version>
     </dependency>
 
-    <!-- TestNG -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
@@ -55,14 +54,12 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Optional: WebDriverManager -->
     <dependency>
       <groupId>io.github.bonigarcia</groupId>
       <artifactId>webdrivermanager</artifactId>
       <version>${webdrivermanager.version}</version>
     </dependency>
 
-    <!-- Healenium: exclude Selenium & legacy HTTP clients -->
     <dependency>
       <groupId>com.epam.healenium</groupId>
       <artifactId>healenium-web</artifactId>
@@ -91,7 +88,6 @@
       </exclusions>
     </dependency>
 
-    <!-- If you actually need the client API, keep this; otherwise remove it -->
     <dependency>
       <groupId>com.epam.healenium</groupId>
       <artifactId>healenium-client</artifactId>
@@ -123,7 +119,6 @@
 
   <build>
     <plugins>
-      <!-- Enforce no conflicts -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -145,18 +140,11 @@
         </executions>
       </plugin>
 
-      <!-- Surefire (auto-detects TestNG in 3.x) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven.surefire.version}</version>
         <configuration>
-          <!-- Uncomment if you use a testng suite file -->
-          <!--
-          <suiteXmlFiles>
-            <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-          </suiteXmlFiles>
-          -->
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
@@ -173,33 +161,17 @@
     </plugins>
   </build>
 
-  <!-- Optional profile: switch to Apache client and drop JDK client -->
   <profiles>
     <profile>
       <id>apache-http-client5</id>
       <dependencies>
+        <!-- ✅ Add explicit version here too -->
         <dependency>
           <groupId>org.seleniumhq.selenium</groupId>
           <artifactId>selenium-http-apache-client5</artifactId>
+          <version>${selenium.version}</version>
         </dependency>
       </dependencies>
-      <dependencyManagement>
-        <dependencies>
-          <!-- Force-remove JDK client when this profile is on -->
-          <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-http-jdk-client</artifactId>
-            <version>${selenium.version}</version>
-            <scope>provided</scope>
-            <exclusions>
-              <exclusion>
-                <groupId>*</groupId>
-                <artifactId>*</artifactId>
-              </exclusion>
-            </exclusions>
-          </dependency>
-        </dependencies>
-      </dependencyManagement>
     </profile>
   </profiles>
 </project>
