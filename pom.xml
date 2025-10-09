@@ -1,7 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.example</groupId>
@@ -10,25 +9,19 @@
   <packaging>jar</packaging>
 
   <properties>
-    <!-- Java toolchain -->
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <!-- Centralized versions -->
     <selenium.version>4.24.0</selenium.version>
     <testng.version>7.10.2</testng.version>
-    <!-- Pick a Healenium release that supports Selenium 4.
-         If you’re unsure, start around 3.5.x and adjust as needed. -->
     <healenium.version>3.5.0</healenium.version>
 
-    <!-- Plugin versions -->
     <maven.surefire.version>3.2.5</maven.surefire.version>
     <maven.enforcer.version>3.4.1</maven.enforcer.version>
     <webdrivermanager.version>5.9.2</webdrivermanager.version>
   </properties>
 
-  <!-- Force all selenium-* to the same version -->
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -42,13 +35,13 @@
   </dependencyManagement>
 
   <dependencies>
-    <!-- Selenium core (pulls modules via BOM) -->
+    <!-- Selenium core (BOM controls versions) -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
     </dependency>
 
-    <!-- Exactly ONE HTTP client; JDK client is simplest (Java 11+) -->
+    <!-- Exactly ONE transport by default -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-http-jdk-client</artifactId>
@@ -62,14 +55,14 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- Optional: WebDriverManager for driver binaries -->
+    <!-- Optional: WebDriverManager -->
     <dependency>
       <groupId>io.github.bonigarcia</groupId>
       <artifactId>webdrivermanager</artifactId>
       <version>${webdrivermanager.version}</version>
     </dependency>
 
-    <!-- Healenium (exclude Selenium & legacy HTTP clients to prevent clashes) -->
+    <!-- Healenium: exclude Selenium & legacy HTTP clients -->
     <dependency>
       <groupId>com.epam.healenium</groupId>
       <artifactId>healenium-web</artifactId>
@@ -98,7 +91,7 @@
       </exclusions>
     </dependency>
 
-    <!-- Add other Healenium modules you use, with the same exclusions -->
+    <!-- If you actually need the client API, keep this; otherwise remove it -->
     <dependency>
       <groupId>com.epam.healenium</groupId>
       <artifactId>healenium-client</artifactId>
@@ -125,25 +118,16 @@
           <artifactId>httpclient</artifactId>
         </exclusion>
       </exclusions>
-      <!-- If you don't use healenium-client directly, you can remove this -->
     </dependency>
-
   </dependencies>
 
   <build>
     <plugins>
-      <!-- Enforce no duplicate/conflicting deps -->
+      <!-- Enforce no conflicts -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
         <version>${maven.enforcer.version}</version>
-                        <dependencies>
-             <dependency>
-               <groupId>org.apache.maven.surefire</groupId>
-               <artifactId>surefire-testng</artifactId>
-               <version>3.2.5</version>
-             </dependency>
-           </dependencies>
         <executions>
           <execution>
             <id>enforce</id>
@@ -161,16 +145,18 @@
         </executions>
       </plugin>
 
-      <!-- Surefire set for TestNG -->
+      <!-- Surefire (auto-detects TestNG in 3.x) -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven.surefire.version}</version>
         <configuration>
-          <!-- Auto-detect TestNG; you can also point to a suite file -->
-          <!-- <suiteXmlFiles>
+          <!-- Uncomment if you use a testng suite file -->
+          <!--
+          <suiteXmlFiles>
             <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-          </suiteXmlFiles> -->
+          </suiteXmlFiles>
+          -->
           <includes>
             <include>**/*Test.java</include>
             <include>**/*Tests.java</include>
@@ -187,25 +173,33 @@
     </plugins>
   </build>
 
-  <!-- Optional profile: swap to Apache HttpClient5 transport instead of JDK client
-       Activate with: -Papache-http-client5 -->
+  <!-- Optional profile: switch to Apache client and drop JDK client -->
   <profiles>
     <profile>
       <id>apache-http-client5</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
       <dependencies>
         <dependency>
           <groupId>org.seleniumhq.selenium</groupId>
           <artifactId>selenium-http-apache-client5</artifactId>
         </dependency>
       </dependencies>
+      <dependencyManagement>
+        <dependencies>
+          <!-- Force-remove JDK client when this profile is on -->
+          <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-http-jdk-client</artifactId>
+            <version>${selenium.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+              <exclusion>
+                <groupId>*</groupId>
+                <artifactId>*</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+        </dependencies>
+      </dependencyManagement>
     </profile>
   </profiles>
 </project>
-
-
-
-
-
