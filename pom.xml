@@ -11,110 +11,161 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-<maven.compiler.source>17</maven.compiler.source>
-<maven.compiler.target>17</maven.compiler.target>
-<selenium.version>4.25.0</selenium.version>
-<cucumber.version>7.14.0</cucumber.version>
-<junit.version>4.13.2</junit.version>
-  <healenium.version>3.4.0</healenium.version>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
 
+    <selenium.version>4.25.0</selenium.version>
+    <cucumber.version>7.15.0</cucumber.version>
+    <testng.version>7.10.2</testng.version>
+    <!-- Use a Selenium 4–compatible Healenium -->
+    <healenium.version>3.5.7</healenium.version>
+
+    <!-- Unified logging stack -->
+    <slf4j.version>2.0.13</slf4j.version>
+    <logback.version>1.5.6</logback.version>
+
+    <maven.surefire.version>3.2.5</maven.surefire.version>
   </properties>
 
   <dependencies>
-           <dependency>
-    <groupId>io.cucumber</groupId>
-    <artifactId>cucumber-testng</artifactId>
-    <version>7.15.0</version>
-    <scope>test</scope>
-  </dependency>
-  <dependency>
-    <groupId>io.cucumber</groupId>
-    <artifactId>cucumber-java</artifactId>
-    <version>7.15.0</version>
-    <scope>test</scope>
-  </dependency>
-             <dependency>
-    <groupId>org.testng</groupId>
-    <artifactId>testng</artifactId>
-    <version>7.10.2</version>
-    <scope>test</scope>
-  </dependency>
-      <!-- Healenium Web (self-healing wrapper for Selenium) -->
-<dependency>
-  <groupId>com.epam.healenium</groupId>
-  <artifactId>healenium-web</artifactId>
-  <version>3.3.1</version>
-</dependency>
-  <dependency>
-  <groupId>org.slf4j</groupId>
-  <artifactId>slf4j-simple</artifactId>
-  <version>2.0.13</version>
-  <scope>test</scope>
-</dependency>
-             <dependency>
-          <groupId>org.apache.maven.surefire</groupId>
-          <artifactId>surefire-testng</artifactId>
-          <version>3.2.5</version>
-        </dependency>
-<dependency>
-  <groupId>ch.qos.logback</groupId>
-  <artifactId>logback-classic</artifactId>
-  <version>1.5.6</version>
-  <scope>runtime</scope>
-</dependency>
-      
-    <!-- ... your selenium-bom etc ... -->
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>2.0.12</version>
-    </dependency>
-  </dependencies>
-</dependencyManagement>
+    <!-- Selenium core -->
     <dependency>
       <groupId>org.seleniumhq.selenium</groupId>
       <artifactId>selenium-java</artifactId>
       <version>${selenium.version}</version>
+    </dependency>
+    <!-- Transport module that exists at 4.25; avoids client factory errors -->
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-http</artifactId>
+      <version>${selenium.version}</version>
+    </dependency>
+
+    <!-- Healenium (exclude conflicting transitives) -->
+    <dependency>
+      <groupId>com.epam.healenium</groupId>
+      <artifactId>healenium-web</artifactId>
+      <version>${healenium.version}</version>
+      <exclusions>
+        <!-- keep our Selenium only -->
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-java</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.seleniumhq.selenium</groupId>
+          <artifactId>selenium-remote-driver</artifactId>
+        </exclusion>
+        <!-- drop legacy transports -->
+        <exclusion>
+          <groupId>com.squareup.okhttp3</groupId>
+          <artifactId>okhttp</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpclient</artifactId>
+        </exclusion>
+        <!-- avoid SLF4J 1.7 being pulled -->
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-simple</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+        </exclusion>
+        <!-- optional noise (remove if you rely on them) -->
+        <exclusion>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>testcontainers</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>junit-jupiter</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.hamcrest</groupId>
+          <artifactId>hamcrest-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.codeborne</groupId>
+          <artifactId>selenide</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Unified SLF4J API + ONE binding (Logback) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${logback.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- Test stack: TestNG + Cucumber -->
+    <dependency>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-java</artifactId>
+      <version>${cucumber.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>${junit.version}</version>
+      <groupId>io.cucumber</groupId>
+      <artifactId>cucumber-testng</artifactId>
+      <version>${cucumber.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${testng.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
 
   <build>
-           <plugins> 
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-surefire-plugin</artifactId>
-  <version>3.2.5</version>
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven.surefire</groupId>
-      <artifactId>surefire-testng</artifactId>
-      <version>3.2.5</version>
-    </dependency>
-  </dependencies>
-  <configuration>
-    <includes>
-      <include>**/*Runner*.java</include>
-      <include>**/*Test.java</include>
-    </includes>
-    <useModulePath>false</useModulePath>
-    <!-- Optionally pin the provider explicitly -->
-    <properties>
-      <property>
-        <name>provider</name>
-        <value>testng</value>
-      </property>
-    </properties>
-<parallel>none</parallel>
-  <useModulePath>false</useModulePath>
-  </configuration>
-</plugin>
+    <plugins>
+      <!-- Surefire detects TestNG; no need for surefire-testng dep -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven.surefire.version}</version>
+        <configuration>
+          <includes>
+            <!-- your runners/tests -->
+            <include>**/*Runner*.java</include>
+            <include>**/*Test.java</include>
+          </includes>
+          <useModulePath>false</useModulePath>
+          <properties>
+            <property>
+              <name>provider</name>
+              <value>testng</value>
+            </property>
+          </properties>
+          <!-- Optional: crank up Healenium logs -->
+          <!--
+          <argLine>
+            -Dheal-enabled=true
+            -DHLM_LOG_LEVEL=debug
+            -Dorg.slf4j.simpleLogger.showDateTime=true
+          </argLine>
+          -->
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
