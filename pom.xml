@@ -45,7 +45,6 @@
     <version>7.10.2</version>
     <scope>test</scope>
   </dependency>
-      <!-- Healenium Web (self-healing wrapper for Selenium) -->
 <dependency>
   <groupId>com.epam.healenium</groupId>
   <artifactId>healenium-web</artifactId>
