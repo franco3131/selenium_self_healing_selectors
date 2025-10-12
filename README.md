@@ -42,14 +42,15 @@ PostgreSQL (DB) – stores healing history, selector versions, and run metadata.
  run tests with a cucumber tag like:
 * mvn test -Dcucumber.filter.tags='@smoke'
 
+--- Extra information: ---
 
- --- What you’ll see in the console when something heals: ---
+*  What you’ll see in the console when something heals:
 
 ```
 [HEALED] from By.cssSelector(.login-btn) to By.cssSelector([data-test='login']) (score 0.76)
 ```
 
-If the backend is running, open the HTML report:
+* If the backend is running, open the HTML report:
 
 ```
 http://localhost:7878/healenium/report/
