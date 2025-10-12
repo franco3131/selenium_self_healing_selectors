@@ -58,7 +58,7 @@ jobs:
           docker compose logs > artifacts/docker-logs/compose.log || true
           docker compose ps   > artifacts/docker-logs/ps.txt || true
           
-      - name: Show Healenium selectors (psql)
+      - name: Show Healenium selectors stored in postgress sql 
         if: always()
         run: |
           docker compose exec -T postgres \
@@ -67,14 +67,7 @@ jobs:
                 FROM selector ORDER BY create_date DESC LIMIT 15;"
 
 
-      - name: List screenshots (debug)
-        if: always()
-        run: |
-          echo "PWD=$(pwd)"
-          ls -la target || true
-          ls -la target/screenshots || true
-      
-      - name: Upload screenshots (on failure)
+      - name: Upload screenshots if scenario fails
         if: failure()
         uses: actions/upload-artifact@v4
         with:
@@ -83,8 +76,7 @@ jobs:
           if-no-files-found: warn
 
 
-
-      - name: What healed (summary)
+      - name: What healed postgress sql
         if: always()
         run: |
           docker compose exec -T postgres psql -U healenium -d healenium -c "
@@ -102,6 +94,8 @@ jobs:
             ORDER BY hr.create_date DESC
             LIMIT 20;
           " || true
+
+          
       - name: Count baseline selectors
         run: docker compose exec -T postgres psql -U healenium -d healenium -c "SELECT COUNT(*) FROM selector;"
 
