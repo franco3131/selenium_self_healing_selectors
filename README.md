@@ -1,4 +1,4 @@
-Selenium self healing selector project
+************************** Selenium self healing selector project ******************************
 
 > Java 17 • Selenium 4.25 • Healenium 3.5.x • TestNG • Cucumber JVM
 
