@@ -14,18 +14,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-/**
- * BaseTest: starts Chrome, wraps it with Healenium for normal use,
- * and captures screenshots (using the raw driver) when a scenario fails.
- */
 public class BaseTest {
 
-    // Healenium-wrapped driver used by your tests
+    // Healenium driver used by tests
     private static final ThreadLocal<WebDriver> threadLocalHealing = new ThreadLocal<>();
-    // RAW Selenium driver used ONLY for screenshots (avoids proxy casting issues)
+    // Raw Selenium driver for screenshots only
     private static final ThreadLocal<WebDriver> threadLocalRaw = new ThreadLocal<>();
 
     public static WebDriver getCurrentBrowser() { return threadLocalHealing.get(); }
+    //for screenshots healenium driver and raw driver seperate 
     public static WebDriver getRawBrowser()     { return threadLocalRaw.get(); }
 
     
@@ -44,42 +41,16 @@ public class BaseTest {
                              "--disable-dev-shm-usage","--window-size=1920,1080");
         // optional if you ever hit origin issues
         options.addArguments("--remote-allow-origins=*");
-         options.addArguments("--disable-infobars");
-        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
-        options.setExperimentalOption("useAutomationExtension", false);
-        options.addArguments("--allow-file-access-from-files","--disable-web-security");
+        //  options.addArguments("--disable-infobars");
+        // options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        // options.setExperimentalOption("useAutomationExtension", false);
+        // options.addArguments("--allow-file-access-from-files","--disable-web-security");
         WebDriver raw = new ChromeDriver(options);
         threadLocalRaw.set(raw);
         WebDriver healing = SelfHealingDriver.create(raw);
         threadLocalHealing.set(healing);
     }
 
-
-    @After(order = 1)
-    public void attachScreenshotIfFailed(Scenario scenario) throws Exception {
-        if (!scenario.isFailed()) return;
-
-        WebDriver raw = getRawBrowser();
-        if (raw instanceof TakesScreenshot) {
-       
-                byte[] png = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
-
-                // 1) Attach to Cucumber report
-                scenario.attach(png, "image/png", scenario.getName());
-
-                // 2) Also save to disk for CI artifacts
-                Path dir = Paths.get("target", "screenshots");
-                Files.createDirectories(dir);
-                String safe = scenario.getName().replaceAll("[^a-zA-Z0-9._-]", "_");
-                Path dest = dir.resolve(safe + "_" + System.currentTimeMillis() + ".png");
-                Files.write(dest, png);
-                System.out.println("[screenshot] saved: " + dest.toAbsolutePath());
-     
-        } else {
-            System.err.println("[screenshot] RAW driver not TakesScreenshot: "
-                    + (raw == null ? "null" : raw.getClass().getName()));
-        }
-    }
 
     @After(order = 0)
     public void quitDriver() {
@@ -90,4 +61,32 @@ public class BaseTest {
         }
         threadLocalRaw.remove();
     }
+    
+    @After(order = 1)
+    public void attachScreenshotIfFailed(Scenario scenario) throws Exception {
+        if (!scenario.isFailed()) return;
+
+        WebDriver raw = getRawBrowser();
+        if (raw instanceof TakesScreenshot) {
+       
+                byte[] png = ((TakesScreenshot) raw).getScreenshotAs(OutputType.BYTES);
+                // Attach to Cucumber report
+                scenario.attach(png, "image/png", scenario.getName());
+
+                // 2) Also save to disk for CI 
+                Path dir = Paths.get("target", "screenshots");
+                Files.createDirectories(dir);
+                String safe = scenario.getName().replaceAll("[^a-zA-Z0-9._-]", "_");
+                Path dest = dir.resolve(safe + "_" + System.currentTimeMillis() + ".png");
+                Files.write(dest, png);
+     
+        } else {
+            System.err.println("[screenshot] RAW driver not TakesScreenshot: "
+                    + (raw == null ? "null" : raw.getClass().getName()));
+        }
+    }
+
+
+
+    
 }
