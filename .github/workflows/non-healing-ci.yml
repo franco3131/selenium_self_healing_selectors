@@ -1,4 +1,4 @@
-name: Non healing run
+name: Normal run (no healenium)
 
 on:
   workflow_dispatch:
