@@ -11,16 +11,21 @@ An example showing how to add **self‑healing locators** to a Selenium/TestNG/C
   * Display data in console
 
 
---- Actions tab ---- 
+--- Actions tab (workflows) ---- 
+* Healenium demo wokrflow - Runs docker compose. Healenium starts up. Then Runs 3 regular scenarios that pass ( to gather selector data using healenium backend). Then run a broken selector scenario and healenium should heal that selector. 
+* Runs docker compose and runs healenium backend before starting the tests. 
+Normal Run:
+ * This showcases what happens when healenium is not running. It will runn the regular scenarios and then run the broken scenario. There should be no healing and the test should fail.
+---
 
+-- Docker compose file -- 
+When running docker compose file (which is done in the healenium demo yml wokrflow) it does the following:
 * runs the healenium demo job to kickstart starting up healenium before running the passing regular tests and broken(intentional test)
 PostgreSQL (DB) – stores healing history, selector versions, and run metadata.
 
 * Selector-Imitator – computes new locators that is used by the healenium driver.
 
 * Healenium Backend  – for healing selector purposes and works with selector-imitator. It also reads from the db to display reporting results.
-
----
 
 
 -- Stack --
