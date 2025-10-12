@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+// thio is for calling when  healing happens in healenium
 public class HealeniumConsoleReporter extends AppenderBase<ILoggingEvent> {
     private static final AtomicBoolean INSTALLED = new AtomicBoolean(false);
 
